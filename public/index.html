@@ -14,76 +14,42 @@
             --glass: rgba(255, 255, 255, 0.75);
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%; 
-            font-family: 'PingFang SC', 'STHeiti', sans-serif;
-            color: #555; overflow: hidden;
-        }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'PingFang SC', sans-serif; color: #555; overflow: hidden; }
 
-        #bg-slider {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%);
-            background-size: cover;
-        }
+        #bg-slider { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%); }
 
-        #music-player {
-            position: fixed; top: 20px; right: 20px; z-index: 100;
-            background: var(--glass); padding: 12px 20px; border-radius: 30px;
-            backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(255, 175, 190, 0.3);
-            display: flex; align-items: center; gap: 12px; border: 1px solid white;
-        }
-        #music-player button { background: none; border: none; font-size: 1.2rem; cursor: pointer; transition: transform 0.2s; }
-        #music-player button:hover { transform: scale(1.2); }
+        #music-player { position: fixed; top: 20px; right: 20px; z-index: 100; background: var(--glass); padding: 12px 20px; border-radius: 30px; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 12px; border: 1px solid white; }
+        #music-player button { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
 
         .container { height: 100vh; display: flex; justify-content: center; align-items: center; }
 
-        .card {
-            background: var(--glass); padding: 2rem;
-            border-radius: 35px; box-shadow: 0 15px 40px rgba(0,0,0,0.05);
-            backdrop-filter: blur(15px); border: 2px solid white;
-            text-align: center; width: 90%; max-width: 550px;
-            max-height: 85vh; overflow-y: auto; position: relative;
-        }
+        .card { background: var(--glass); padding: 2rem; border-radius: 35px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); backdrop-filter: blur(15px); border: 2px solid white; text-align: center; width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; position: relative; }
 
-        h1, h2, h3 { color: var(--deep-pink); letter-spacing: 2px; }
+        h1, h2, h3 { color: var(--deep-pink); }
 
-        .btn {
-            padding: 10px 20px; border: none; border-radius: 25px;
-            cursor: pointer; transition: all 0.3s ease;
-            font-size: 0.9rem; margin: 5px;
-            background: white; color: var(--deep-pink);
-            box-shadow: 0 5px 15px rgba(251, 111, 146, 0.1);
-        }
+        .btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; transition: 0.3s; font-size: 0.9rem; margin: 5px; background: white; color: var(--deep-pink); }
         .btn-primary { background: var(--deep-pink); color: white; }
         .btn-blue { background: var(--boy-blue); color: white; }
 
-        /* 相册分组样式 */
-        .group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .group-item {
-            background: white; padding: 25px 10px; border-radius: 20px;
-            cursor: pointer; border: 1px solid #ffe5ec; position: relative;
-            transition: 0.3s; font-weight: bold; color: var(--deep-pink);
-        }
-        .group-item:hover { transform: translateY(-3px); background: var(--light-pink); }
-        .group-del { position: absolute; top: 5px; right: 5px; color: #ff9999; font-size: 12px; padding: 5px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; transition: 0.3s; color: var(--deep-pink); font-weight: bold; }
+        .menu-item:hover { transform: translateY(-3px); background: var(--light-pink); }
 
-        /* 图片列表 */
+        .group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .group-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; position: relative; color: var(--deep-pink); font-weight: bold; }
+        
         .album-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin: 15px 0; }
-        .album-img-wrapper { position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 3px 8px rgba(0,0,0,0.08); }
+        .album-img-wrapper { position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; }
         .album-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         
-        .img-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 4px; }
-        .action-btn { background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; }
-
-        /* 左下角常驻按钮 */
         .bottom-left-btn { position: absolute; bottom: 15px; left: 20px; font-size: 12px; color: var(--deep-pink); cursor: pointer; opacity: 0.8; }
 
-        .hidden { display: none; }
-        textarea { width: 100%; border-radius: 20px; border: 1px solid #ffe5ec; padding: 15px; box-sizing: border-box; background: rgba(255,255,255,0.6); }
         .memo-item { margin: 10px 0; padding: 15px; border-radius: 20px; max-width: 80%; font-size: 14px; }
-        .memo-left { background: var(--light-pink); color: var(--deep-pink); margin-right: auto; text-align: left; border-bottom-left-radius: 2px; }
-        .memo-right { background: var(--boy-blue); color: white; margin-left: auto; text-align: right; border-bottom-right-radius: 2px; }
+        .memo-left { background: var(--light-pink); color: var(--deep-pink); margin-right: auto; text-align: left; }
+        .memo-right { background: var(--boy-blue); color: white; margin-left: auto; text-align: right; }
+
+        .hidden { display: none; }
+        textarea { width: 100%; border-radius: 20px; border: 1px solid #ffe5ec; padding: 15px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -94,13 +60,12 @@
         <button onclick="prevMusic()">⏮️</button>
         <button id="play-btn" onclick="toggleMusic()">▶️</button>
         <button onclick="nextMusic()">⏭️</button>
-        <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5" onchange="setVolume(this.value)" style="width:50px; accent-color: var(--deep-pink);">
+        <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5" onchange="setVolume(this.value)" style="width:50px;">
     </div>
 
     <div class="container">
         <div id="login-page" class="card">
             <h1>给黄泽钰搭的小窝</h1>
-            <p style="color: #888;">是谁在敲门呀？</p>
             <div style="display: flex; flex-direction: column; gap: 5px;">
                 <button class="btn btn-primary" onclick="login('黄泽钰')">我是 黄泽钰 🌸</button>
                 <button class="btn btn-blue" onclick="login('李鸿运')">我是 李鸿运 ☁️</button>
@@ -109,11 +74,11 @@
 
         <div id="main-page" class="card hidden">
             <h2 id="welcome-msg"></h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
-                <div class="menu-item" style="padding:25px; background:white; border-radius:20px; cursor:pointer;" onclick="showGroups()">📷 相册</div>
-                <div class="menu-item" style="padding:25px; background:white; border-radius:20px; cursor:pointer;" onclick="showSection('memo')">📖 回忆录</div>
-                <div class="menu-item" style="padding:25px; background:white; border-radius:20px; cursor:pointer;" onclick="showSection('mood')">✍️ 记心情</div>
-                <div class="menu-item" style="padding:25px; background:white; border-radius:20px; cursor:pointer;" onclick="missYou()">❤️ 想你了</div>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="showGroups()">📷 相册</div>
+                <div class="menu-item" onclick="showSection('memo')">📖 回忆录</div>
+                <div class="menu-item" onclick="showSection('mood')">✍️ 记心情</div>
+                <div class="menu-item" onclick="missYou()">❤️ 想你了</div>
             </div>
         </div>
 
@@ -133,10 +98,8 @@
         const playlist = [
             "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/M500004RMLd70LGo7K.mp3",
             "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/xiaojiuwo.mp3",
-            "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/jiangnan.mp3"
-        ]; 
+            "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/jiangnan.mp3"]; 
         let currentMusicIdx = 0;
-        let audioInitiated = false;
         const audio = document.getElementById('audio-element');
         audio.addEventListener('ended', nextMusic);
 
@@ -160,38 +123,63 @@
             initAudio();
         }
 
-        // --- 相册分组逻辑 ---
+        async function missYou() {
+            await api('missYou');
+            alert("思念已送达！❤️");
+        }
+
+        async function checkMissStats() {
+            const stats = await api('getMissStats');
+            if(currentUser === '黄泽钰') {
+                alert(`哇塞，李鸿运今天想了你 ${stats.today} 次，本月想了你 ${stats.month} 次，今年想了你 ${stats.year} 次，黄泽钰真是个幸福的小朋友`);
+            } else {
+                alert(`哇塞，黄泽钰今天想了你 ${stats.today} 次，本月想了你 ${stats.month} 次，今年想了你 ${stats.year} 次，黄泽钰真是个乖巧可爱温柔大方善良美丽的小朋友`);
+            }
+        }
+
+        async function showSection(type) {
+            document.getElementById('main-page').classList.add('hidden');
+            const page = document.getElementById('content-page');
+            const detail = document.getElementById('page-detail');
+            page.classList.remove('hidden');
+            document.getElementById('bottom-controls').innerHTML = '';
+
+            if(type === 'mood') {
+                detail.innerHTML = `<h3>记心情</h3><textarea id="mood-text" rows="5"></textarea><br><button class="btn btn-primary" onclick="saveMood()">保存</button>`;
+            } else if(type === 'memo') {
+                const logs = await api('getMemos');
+                detail.innerHTML = `<h3>回忆录</h3>
+                    <button class="btn btn-blue" style="margin-bottom:15px" onclick="checkMissStats()">🔍 看看TA有没有想我</button>
+                    <div id="memo-list" style="display:flex;flex-direction:column;gap:10px;max-height:350px;overflow-y:auto"></div>`;
+                const list = document.getElementById('memo-list');
+                logs.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = `memo-item ${item.user === '黄泽钰' ? 'memo-left' : 'memo-right'}`;
+                    div.innerHTML = `<span style="font-size:10px;opacity:0.6">${item.time}</span><br>${item.content}`;
+                    list.appendChild(div);
+                });
+            }
+        }
+
+        // --- 相册逻辑 ---
         async function showGroups() {
             document.getElementById('main-page').classList.add('hidden');
             const page = document.getElementById('content-page');
             const detail = document.getElementById('page-detail');
             page.classList.remove('hidden');
-            
             detail.innerHTML = `<h3>我们的相册</h3><div class="group-grid" id="group-list"></div>`;
             const groups = await api('getGroups');
             const photos = await api('getPhotos');
             const list = document.getElementById('group-list');
-
             groups.forEach(g => {
                 const count = photos.filter(p => p.group === g).length;
                 const div = document.createElement('div');
                 div.className = 'group-item';
-                div.innerHTML = `📂 ${g}<br><small style="font-weight:normal;opacity:0.6">${count} 张照片</small>`;
-                if(count === 0 && g !== '默认分组') {
-                    const del = document.createElement('span');
-                    del.className = 'group-del'; del.innerText = '×';
-                    del.onclick = async (e) => { e.stopPropagation(); if(confirm('删除空分组？')) { await api('delGroup', {groupName: g}); showGroups(); } };
-                    div.appendChild(del);
-                }
+                div.innerHTML = `📂 ${g}<br><small>${count} 张</small>`;
                 div.onclick = () => openGroup(g);
                 list.appendChild(div);
             });
             document.getElementById('bottom-controls').innerHTML = `<div class="bottom-left-btn" onclick="addNewGroup()">＋ 新建分组</div>`;
-        }
-
-        async function addNewGroup() {
-            const name = prompt("请输入新分组名称:");
-            if(name) { await api('addGroup', {groupName: name}); showGroups(); }
         }
 
         async function openGroup(g) {
@@ -200,11 +188,11 @@
             detail.innerHTML = `<h3>${g}</h3><div class="album-view" id="img-list"></div>
                 <div style="background:white;padding:15px;border-radius:20px;border:1px dashed var(--soft-pink)">
                     <input type="file" id="img-input" accept="image/*" style="display:none">
-                    <label for="img-input" style="cursor:pointer;color:var(--deep-pink)">✨ 点击上传到此处 ✨</label><br>
-                    <button class="btn btn-primary" style="margin-top:10px" onclick="uploadToGroup()">开始上传</button>
+                    <label for="img-input" style="cursor:pointer;color:var(--deep-pink)">✨ 上传到此处 ✨</label><br>
+                    <button class="btn btn-primary" onclick="uploadToGroup()">上传</button>
                 </div>`;
             refreshGroupPhotos();
-            document.getElementById('bottom-controls').innerHTML = `<div class="bottom-left-btn" onclick="showGroups()">⬅ 返回分组列表</div>`;
+            document.getElementById('bottom-controls').innerHTML = `<div class="bottom-left-btn" onclick="showGroups()">⬅ 返回</div>`;
         }
 
         async function refreshGroupPhotos() {
@@ -214,9 +202,8 @@
             photos.filter(p => p.group === currentGroup).forEach(p => {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'album-img-wrapper';
-                wrapper.innerHTML = `<img src="${p.data}"><div class="img-actions">
-                    <button class="action-btn" onclick="downloadImg('${p.data}')">💾</button>
-                    <button class="action-btn" style="color:red" onclick="deletePhoto(${p.id})">×</button>
+                wrapper.innerHTML = `<img src="${p.data}"><div style="position:absolute;top:5px;right:5px">
+                    <button class="btn" style="padding:5px" onclick="deletePhoto(${p.id})">×</button>
                 </div>`;
                 list.appendChild(wrapper);
             });
@@ -233,59 +220,19 @@
             reader.readAsDataURL(file);
         }
 
-        // --- 基础功能逻辑 ---
-        async function showSection(type) {
-            document.getElementById('main-page').classList.add('hidden');
-            const page = document.getElementById('content-page');
-            const detail = document.getElementById('page-detail');
-            page.classList.remove('hidden');
-            document.getElementById('bottom-controls').innerHTML = '';
-
-            if(type === 'mood') {
-                detail.innerHTML = `<h3>记心情</h3><textarea id="mood-text" rows="5"></textarea><br><button class="btn btn-primary" onclick="saveMood()">保存</button>`;
-            } else if(type === 'memo') {
-                const logs = await api('getMemos');
-                detail.innerHTML = `<h3>回忆录</h3><div id="memo-list" style="display:flex;flex-direction:column;gap:10px;max-height:350px;overflow-y:auto"></div>`;
-                const list = document.getElementById('memo-list');
-                logs.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = `memo-item ${item.user === '黄泽钰' ? 'memo-left' : 'memo-right'}`;
-                    div.innerHTML = `<span style="font-size:10px;opacity:0.6">${item.time}</span><br>${item.content}`;
-                    list.appendChild(div);
-                });
-            }
-        }
-
         async function saveMood() {
             const content = document.getElementById('mood-text').value;
             if(content) { await api('addMemo', { content }); backToMain(); }
         }
 
-        async function deletePhoto(id) {
-            if(confirm('真的要清除记忆吗？')) { await api('delPhoto', {id}); refreshGroupPhotos(); }
-        }
-
-        function downloadImg(dataUrl) {
-            const link = document.createElement('a'); link.href = dataUrl;
-            link.download = `回忆_${Date.now()}.png`; link.click();
-        }
-
         function initAudio() {
-            if (!audioInitiated) {
-                audio.src = playlist[currentMusicIdx];
-                audio.play().then(() => document.getElementById('play-btn').innerText = "⏸️").catch(() => {});
-                audioInitiated = true;
-            }
+            audio.src = playlist[currentMusicIdx];
+            audio.play().catch(() => {});
         }
-        function toggleMusic() { if(!audioInitiated) initAudio(); audio.paused ? audio.play() : audio.pause(); document.getElementById('play-btn').innerText = audio.paused ? "▶️" : "⏸️"; }
+        function toggleMusic() { audio.paused ? audio.play() : audio.pause(); }
         function nextMusic() { currentMusicIdx = (currentMusicIdx+1)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
         function prevMusic() { currentMusicIdx = (currentMusicIdx-1+playlist.length)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
-        function setVolume(v) { audio.volume = v; }
-        function missYou() { alert("我也想你啦！❤️"); }
-        function backToMain() {
-            document.getElementById('content-page').classList.add('hidden');
-            document.getElementById('main-page').classList.remove('hidden');
-        }
+        function backToMain() { document.getElementById('content-page').classList.add('hidden'); document.getElementById('main-page').classList.remove('hidden'); }
     </script>
 </body>
 </html>
