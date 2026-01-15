@@ -85,7 +85,7 @@
         </div>
     </div>
 
-    <audio id="audio-element"></audio>
+    <audio id="audio-element" preload="auto"></audio>
 
     <script>
         let currentUser = "";
@@ -129,24 +129,32 @@
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('main-page').classList.remove('hidden');
             document.getElementById('welcome-msg').innerText = "你好呀, " + user;
+            
+            // 关键：在点击登录确定后，浏览器允许播放，立即启动
             initAudio();
         }
 
         function initAudio() {
-            if (!audioInitiated) {
-                audio.src = playlist[currentMusicIdx];
-                audio.volume = document.getElementById('volume').value;
-                audio.play().then(() => {
-                    document.getElementById('play-btn').innerText = "⏸️";
-                }).catch(e => console.log("Waiting for interaction"));
+            // 无论是否初始化过，都重新尝试播放以激活 Context
+            audio.src = playlist[currentMusicIdx];
+            audio.volume = document.getElementById('volume').value;
+            audio.play().then(() => {
+                document.getElementById('play-btn').innerText = "⏸️";
                 audioInitiated = true;
-            }
+            }).catch(e => {
+                console.log("播放被拦截，等待下次点击页面");
+            });
         }
 
         function toggleMusic() { 
             if (!audioInitiated) initAudio();
-            audio.paused ? audio.play() : audio.pause();
-            document.getElementById('play-btn').innerText = audio.paused ? "▶️" : "⏸️";
+            if (audio.paused) {
+                audio.play();
+                document.getElementById('play-btn').innerText = "⏸️";
+            } else {
+                audio.pause();
+                document.getElementById('play-btn').innerText = "▶️";
+            }
         }
 
         function nextMusic() { 
@@ -165,6 +173,7 @@
 
         function setVolume(v) { audio.volume = v; }
 
+        // --- 核心：回忆录搜索与展示 ---
         async function showSection(type) {
             document.getElementById('main-page').classList.add('hidden');
             const page = document.getElementById('content-page');
@@ -295,8 +304,6 @@
         }
         async function addNewGroup() { const name = prompt("请输入新分组名称:"); if(name) { await api('addGroup', {groupName: name}); showGroups(); } }
         async function deletePhoto(id) { if(confirm('删除这张回忆？')) { await api('delPhoto', {id}); refreshGroupPhotos(); } }
-        function nextMusic() { currentMusicIdx = (currentMusicIdx+1)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
-        function prevMusic() { currentMusicIdx = (currentMusicIdx-1+playlist.length)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
         function backToMain() { document.getElementById('content-page').classList.add('hidden'); document.getElementById('main-page').classList.remove('hidden'); }
     </script>
 </body>
