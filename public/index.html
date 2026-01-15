@@ -7,7 +7,7 @@
     <style>
         :root {
             --soft-pink: #ffc2d1;
-            --light-pink: #fff0f3; /* 黄泽钰气泡的新颜色 */
+            --light-pink: #fff0f3;
             --deep-pink: #fb6f92;
             --cream: #fff5f5;
             --boy-blue: #a2d2ff;
@@ -20,7 +20,6 @@
             color: #555; overflow: hidden;
         }
 
-        /* 固定浪漫粉色渐变背景 */
         #bg-slider {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
@@ -28,7 +27,6 @@
             background-size: cover;
         }
 
-        /* 音乐控制面板 */
         #music-player {
             position: fixed; top: 20px; right: 20px; z-index: 100;
             background: var(--glass); padding: 12px 20px; border-radius: 30px;
@@ -74,18 +72,25 @@
         }
         .menu-item:hover { background: var(--soft-pink); color: white; }
 
-        /* 相册：预览在上，操作在下 */
         .album-view {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 15px; margin-bottom: 25px; padding: 10px;
         }
         .album-img-wrapper { position: relative; border-radius: 20px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .album-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        .del-btn {
-            position: absolute; top: 8px; right: 8px; background: rgba(251, 111, 146, 0.9);
-            color: white; border-radius: 50%; width: 26px; height: 26px;
-            font-size: 16px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        
+        /* 按钮组容器 */
+        .img-actions {
+            position: absolute; top: 8px; right: 8px; display: flex; gap: 5px;
         }
+        .action-btn {
+            background: rgba(251, 111, 146, 0.9);
+            color: white; border-radius: 50%; width: 28px; height: 28px;
+            font-size: 14px; border: none; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .dl-btn { background: rgba(162, 210, 255, 0.9); }
 
         textarea {
             width: 100%; border-radius: 25px; border: 1px solid #ffe5ec;
@@ -93,10 +98,9 @@
             background: rgba(255,255,255,0.8); margin-bottom: 15px; box-sizing: border-box;
         }
 
-        /* 回忆录气泡微调 */
         .memo-item { margin: 15px 0; padding: 18px; border-radius: 25px; position: relative; max-width: 85%; line-height: 1.5; }
         .memo-left { 
-            background: var(--light-pink); /* 调成了偏粉色点 */
+            background: var(--light-pink); 
             color: var(--deep-pink); 
             align-self: flex-start; margin-right: auto; text-align: left; 
             border-bottom-left-radius: 5px; box-shadow: 5px 5px 15px rgba(251, 111, 146, 0.1); 
@@ -163,7 +167,6 @@
         let audioInitiated = false;
         const audio = document.getElementById('audio-element');
 
-        // 自动切歌 & 列表循环
         audio.addEventListener('ended', nextMusic);
 
         async function api(action, data = {}) {
@@ -177,7 +180,7 @@
         function login(user) {
             currentUser = user;
             if (user === '黄泽钰') {
-                alert("原来是小狗呀~😚");
+                alert("原来是小狗呀~我亲亲 💋");
             } else if (user === '李鸿运') {
                 alert("大胆！竟然想篡位！😤");
             }
@@ -192,7 +195,7 @@
                 audio.src = playlist[currentMusicIdx];
                 audio.play().then(() => {
                     document.getElementById('play-btn').innerText = "⏸️";
-                }).catch(e => console.log("等待手动操作"));
+                }).catch(e => console.log("Waiting for interaction"));
                 audioInitiated = true;
             }
         }
@@ -276,9 +279,26 @@
             photos.forEach(p => {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'album-img-wrapper';
-                wrapper.innerHTML = `<img src="${p.data}"><button class="del-btn" onclick="deletePhoto(${p.id})">×</button>`;
+                // 添加了下载按钮和删除按钮的组合
+                wrapper.innerHTML = `
+                    <img src="${p.data}">
+                    <div class="img-actions">
+                        <button class="action-btn dl-btn" onclick="downloadImg('${p.data}')" title="下载">💾</button>
+                        <button class="action-btn" onclick="deletePhoto(${p.id})" title="删除">×</button>
+                    </div>
+                `;
                 list.appendChild(wrapper);
             });
+        }
+
+        // 下载功能实现
+        function downloadImg(dataUrl) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `我们的回忆_${new Date().getTime()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         async function deletePhoto(id) {
