@@ -108,13 +108,25 @@
             return res.json();
         }
 
-        function login(user) {
+       function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
-            if (user === '黄泽钰' && pwd === 'ilovelhy') { alert("原来是小狗呀~我亲亲 💋"); enter(user); }
-            else if (user === '李鸿运' && pwd === 'ilovehzy') { alert("小笨蛋，进来偷看来啦？"); enter(user); }
-            else { alert("大胆！竟然想篡位！😤"); }
+            if (user === '黄泽钰') {
+                if (pwd === 'ilovelhy') {
+                    alert("原来是小狗呀~我亲亲 💋");
+                    enter(user);
+                } else {
+                    alert("小笨蛋输错啦");
+                }
+            } else if (user === '李鸿运') {
+                if (pwd === 'ilovehzy') {
+                    alert("大胆！竟然想篡位！😤");
+                    enter(user);
+                } else {
+                    alert("口令不对！休想进入！⚔️");
+                }
+            }
         }
-
+        
         function enter(user) {
             currentUser = user;
             document.getElementById('login-page').classList.add('hidden');
@@ -250,4 +262,5 @@
     </script>
 </body>
 </html>
+
 
