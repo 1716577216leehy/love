@@ -7,6 +7,7 @@
     <style>
         :root {
             --soft-pink: #ffc2d1;
+            --light-pink: #fff0f3; /* 黄泽钰气泡的新颜色 */
             --deep-pink: #fb6f92;
             --cream: #fff5f5;
             --boy-blue: #a2d2ff;
@@ -92,9 +93,20 @@
             background: rgba(255,255,255,0.8); margin-bottom: 15px; box-sizing: border-box;
         }
 
+        /* 回忆录气泡微调 */
         .memo-item { margin: 15px 0; padding: 18px; border-radius: 25px; position: relative; max-width: 85%; line-height: 1.5; }
-        .memo-left { background: #fff; color: var(--deep-pink); align-self: flex-start; margin-right: auto; text-align: left; border-bottom-left-radius: 5px; box-shadow: 5px 5px 15px rgba(251, 111, 146, 0.1); }
-        .memo-right { background: var(--boy-blue); color: white; align-self: flex-end; margin-left: auto; text-align: right; border-bottom-right-radius: 5px; box-shadow: -5px 5px 15px rgba(162, 210, 255, 0.3); }
+        .memo-left { 
+            background: var(--light-pink); /* 调成了偏粉色点 */
+            color: var(--deep-pink); 
+            align-self: flex-start; margin-right: auto; text-align: left; 
+            border-bottom-left-radius: 5px; box-shadow: 5px 5px 15px rgba(251, 111, 146, 0.1); 
+        }
+        .memo-right { 
+            background: var(--boy-blue); 
+            color: white; 
+            align-self: flex-end; margin-left: auto; text-align: right; 
+            border-bottom-right-radius: 5px; box-shadow: -5px 5px 15px rgba(162, 210, 255, 0.3); 
+        }
         .memo-time { font-size: 11px; opacity: 0.7; display: block; margin-bottom: 5px; }
 
         .hidden { display: none; }
@@ -138,11 +150,10 @@
         </div>
     </div>
 
-    <audio id="audio-element" loop></audio>
+    <audio id="audio-element"></audio>
 
     <script>
         let currentUser = "";
-        // 音乐播放列表
         const playlist = [
             "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/M500004RMLd70LGo7K.mp3",
             "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/xiaojiuwo.mp3",
@@ -151,6 +162,9 @@
         let currentMusicIdx = 0;
         let audioInitiated = false;
         const audio = document.getElementById('audio-element');
+
+        // 自动切歌 & 列表循环
+        audio.addEventListener('ended', nextMusic);
 
         async function api(action, data = {}) {
             const res = await fetch('/api/data', {
@@ -162,18 +176,14 @@
 
         function login(user) {
             currentUser = user;
-            
-            // 专属弹窗逻辑
             if (user === '黄泽钰') {
-                alert("原来是小狗呀~我亲亲 💋");
+                alert("原来是小狗呀~😚");
             } else if (user === '李鸿运') {
                 alert("大胆！竟然想篡位！😤");
             }
-
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('main-page').classList.remove('hidden');
             document.getElementById('welcome-msg').innerText = "你好呀, " + user;
-            
             initAudio(); 
         }
 
@@ -182,7 +192,7 @@
                 audio.src = playlist[currentMusicIdx];
                 audio.play().then(() => {
                     document.getElementById('play-btn').innerText = "⏸️";
-                }).catch(e => console.log("浏览器限制自动播放"));
+                }).catch(e => console.log("等待手动操作"));
                 audioInitiated = true;
             }
         }
@@ -192,8 +202,21 @@
             audio.paused ? audio.play() : audio.pause();
             document.getElementById('play-btn').innerText = audio.paused ? "▶️" : "⏸️";
         }
-        function nextMusic() { currentMusicIdx = (currentMusicIdx+1)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); document.getElementById('play-btn').innerText = "⏸️";}
-        function prevMusic() { currentMusicIdx = (currentMusicIdx-1+playlist.length)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); document.getElementById('play-btn').innerText = "⏸️";}
+
+        function nextMusic() { 
+            currentMusicIdx = (currentMusicIdx + 1) % playlist.length; 
+            audio.src = playlist[currentMusicIdx]; 
+            audio.play(); 
+            document.getElementById('play-btn').innerText = "⏸️";
+        }
+
+        function prevMusic() { 
+            currentMusicIdx = (currentMusicIdx - 1 + playlist.length) % playlist.length; 
+            audio.src = playlist[currentMusicIdx]; 
+            audio.play(); 
+            document.getElementById('play-btn').innerText = "⏸️";
+        }
+
         function setVolume(v) { audio.volume = v; }
 
         async function showSection(type) {
