@@ -25,16 +25,13 @@
         .btn-primary { background: var(--deep-pink); color: white; }
         .btn-blue { background: var(--boy-blue); color: white; }
 
-        /* 搜索框样式 */
         .search-box { background: white; padding: 15px; border-radius: 20px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .search-input { border: 1px solid #ffe5ec; border-radius: 15px; padding: 8px 12px; outline: none; font-size: 14px; }
         
-        /* 记录气泡 */
         .memo-item { margin: 10px 0; padding: 15px; border-radius: 20px; max-width: 85%; font-size: 14px; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); transition: background 0.5s; }
         .memo-left { background: var(--light-pink); color: var(--deep-pink); margin-right: auto; text-align: left; border-bottom-left-radius: 2px; }
         .memo-right { background: var(--boy-blue); color: white; margin-left: auto; text-align: right; border-bottom-right-radius: 2px; }
         
-        /* 闪烁高亮效果 */
         @keyframes highlight-fade {
             0% { background: #ffdada; transform: scale(1.02); }
             50% { background: #ffdada; transform: scale(1.02); }
@@ -93,12 +90,13 @@
     <script>
         let currentUser = "";
         let allMemos = []; 
-                const playlist = [
-            "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/M500004RMLd70LGo7K.mp3",
-            "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/xiaojiuwo.mp3",
-            "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/jiangnan.mp3"
+        const playlist = [
+            "https://raw.githubusercontent.com/1716577216leehy/love/main/public/music/M500004RMLd70LGo7K.mp3",
+            "https://raw.githubusercontent.com/1716577216leehy/love/main/public/music/xiaojiuwo.mp3",
+            "https://raw.githubusercontent.com/1716577216leehy/love/main/public/music/jiangnan.mp3"
         ]; 
         let currentMusicIdx = 0;
+        let audioInitiated = false;
         const audio = document.getElementById('audio-element');
         audio.addEventListener('ended', nextMusic);
 
@@ -107,7 +105,7 @@
             return res.json();
         }
 
-       function login(user) {
+        function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
             if (user === '黄泽钰') {
                 if (pwd === 'ilovelhy') {
@@ -134,7 +132,39 @@
             initAudio();
         }
 
-        // --- 核心：回忆录搜索与展示 ---
+        function initAudio() {
+            if (!audioInitiated) {
+                audio.src = playlist[currentMusicIdx];
+                audio.volume = document.getElementById('volume').value;
+                audio.play().then(() => {
+                    document.getElementById('play-btn').innerText = "⏸️";
+                }).catch(e => console.log("Waiting for interaction"));
+                audioInitiated = true;
+            }
+        }
+
+        function toggleMusic() { 
+            if (!audioInitiated) initAudio();
+            audio.paused ? audio.play() : audio.pause();
+            document.getElementById('play-btn').innerText = audio.paused ? "▶️" : "⏸️";
+        }
+
+        function nextMusic() { 
+            currentMusicIdx = (currentMusicIdx + 1) % playlist.length; 
+            audio.src = playlist[currentMusicIdx]; 
+            audio.play(); 
+            document.getElementById('play-btn').innerText = "⏸️";
+        }
+
+        function prevMusic() { 
+            currentMusicIdx = (currentMusicIdx - 1 + playlist.length) % playlist.length; 
+            audio.src = playlist[currentMusicIdx]; 
+            audio.play(); 
+            document.getElementById('play-btn').innerText = "⏸️";
+        }
+
+        function setVolume(v) { audio.volume = v; }
+
         async function showSection(type) {
             document.getElementById('main-page').classList.add('hidden');
             const page = document.getElementById('content-page');
@@ -155,7 +185,6 @@
             detail.innerHTML = `
                 <h3>回忆录</h3>
                 <button class="btn btn-blue" style="margin-bottom:10px" onclick="checkMissStats()">🔍 看看TA有没有想我</button>
-                
                 <div class="search-box">
                     <div style="display:flex; gap:5px;">
                         <input type="date" id="search-date" class="search-input" style="flex:1">
@@ -163,10 +192,9 @@
                     </div>
                     <button class="btn btn-primary" style="margin:0" onclick="handleSearch()">开始搜索</button>
                 </div>
-
                 <div id="memo-list"></div>
             `;
-            renderMemos(allMemos.slice().reverse()); // 默认倒序
+            renderMemos(allMemos.slice().reverse());
         }
 
         function renderMemos(data) {
@@ -174,7 +202,7 @@
             list.innerHTML = '';
             data.forEach(item => {
                 const div = document.createElement('div');
-                div.id = item.memoId || ""; // 绑定唯一ID用于定位
+                div.id = item.memoId || "";
                 div.className = `memo-item ${item.user === '黄泽钰' ? 'memo-left' : 'memo-right'}`;
                 div.innerHTML = `<span style="font-size:10px;opacity:0.6">${item.time}</span><br>${item.content}`;
                 list.appendChild(div);
@@ -184,31 +212,18 @@
         function handleSearch() {
             const dateVal = document.getElementById('search-date').value;
             const textVal = document.getElementById('search-text').value.toLowerCase();
-            
-            // 找出符合条件的记录
             const results = allMemos.filter(m => {
                 const matchDate = dateVal ? (m.rawDate === dateVal) : true;
                 const matchText = textVal ? (m.content.toLowerCase().includes(textVal)) : true;
                 return matchDate && matchText;
             });
-
             if (results.length === 0) {
                 alert("哎呀，没找到相关的记录呢...");
                 return;
             }
-
-            // 搜索结果：如果只有一个，直接定位；如果有多个，渲染列表
-            if (results.length === 1 || (dateVal && textVal)) {
-                // 定位到其中最新的那一条
-                const targetId = results[results.length - 1].memoId;
-                renderMemos(allMemos.slice().reverse()); // 先确保所有内容都加载了
-                setTimeout(() => scrollToMemo(targetId), 100);
-            } else {
-                // 如果结果很多，先只显示结果，点击后再定位（逻辑简化，此处直接显示全部并滚动到第一条结果）
-                renderMemos(allMemos.slice().reverse());
-                const targetId = results[results.length - 1].memoId;
-                setTimeout(() => scrollToMemo(targetId), 100);
-            }
+            renderMemos(allMemos.slice().reverse());
+            const targetId = results[results.length - 1].memoId;
+            setTimeout(() => scrollToMemo(targetId), 100);
         }
 
         function scrollToMemo(id) {
@@ -220,8 +235,7 @@
             }
         }
 
-        // --- 其余相册/音乐逻辑保持不变 ---
-        async function missYou() { await api('missYou'); alert("思念已送达！❤️"); }
+        async function missYou() { await api('missYou'); alert("我也想你啦！❤️"); }
         async function checkMissStats() {
             const stats = await api('getMissStats');
             const msg = currentUser === '黄泽钰' ? 
@@ -281,13 +295,9 @@
         }
         async function addNewGroup() { const name = prompt("请输入新分组名称:"); if(name) { await api('addGroup', {groupName: name}); showGroups(); } }
         async function deletePhoto(id) { if(confirm('删除这张回忆？')) { await api('delPhoto', {id}); refreshGroupPhotos(); } }
-        function initAudio() { audio.src = playlist[currentMusicIdx]; audio.play().catch(() => {}); }
-        function toggleMusic() { audio.paused ? audio.play() : audio.pause(); }
         function nextMusic() { currentMusicIdx = (currentMusicIdx+1)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
         function prevMusic() { currentMusicIdx = (currentMusicIdx-1+playlist.length)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
         function backToMain() { document.getElementById('content-page').classList.add('hidden'); document.getElementById('main-page').classList.remove('hidden'); }
     </script>
 </body>
 </html>
-
-
