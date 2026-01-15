@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>给黄泽钰搭的小窝</title>
+    <style>
+        :root { --pink: #ffafbd; --light-pink: #ffc3a0; --text: #5d5d5d; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'STKaiti', 'serif'; overflow: hidden; }
+        
+        /* 动态虚化背景 */
+        #bg-slider {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; filter: blur(15px) brightness(0.8);
+            background: linear-gradient(45deg, var(--pink), var(--light-pink));
+            background-size: cover; background-position: center;
+            transition: background-image 2s ease-in-out;
+        }
+
+        /* 音乐控制栏 */
+        #music-player {
+            position: fixed; top: 20px; right: 20px; z-index: 100;
+            background: rgba(255, 255, 255, 0.6); padding: 10px; border-radius: 20px;
+            backdrop-filter: blur(5px); display: flex; align-items: center; gap: 10px;
+        }
+
+        /* 登录与主页容器 */
+        .container {
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            background: rgba(255, 192, 203, 0.2);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.85); padding: 2rem;
+            border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center; width: 80%; max-width: 500px;
+        }
+
+        .hidden { display: none; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-item {
+            padding: 20px; background: var(--pink); color: white;
+            border-radius: 15px; cursor: pointer; transition: 0.3s;
+        }
+        .menu-item:hover { transform: scale(1.05); }
+        
+        /* 记录样式 */
+        .memo-left { text-align: left; color: #d63384; margin-bottom: 10px; }
+        .memo-right { text-align: right; color: #0d6efd; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="bg-slider"></div>
+
+    <div id="music-player">
+        <button onclick="prevMusic()">⏮️</button>
+        <button id="play-btn" onclick="toggleMusic()">▶️</button>
+        <button onclick="nextMusic()">⏭️</button>
+        <input type="range" id="volume" min="0" max="1" step="0.1" onchange="setVolume(this.value)">
+    </div>
+
+    <div class="container">
+        <div id="login-page" class="card">
+            <h1>给黄泽钰搭的小窝</h1>
+            <p>点击选择身份进入</p>
+            <button class="menu-item" onclick="login('黄泽钰')">我是 黄泽钰</button>
+            <button class="menu-item" onclick="login('李鸿运')" style="background:#a1c4fd">我是 李鸿运</button>
+        </div>
+
+        <div id="main-page" class="card hidden">
+            <h2 id="welcome-msg"></h2>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="showSection('album')">相册</div>
+                <div class="menu-item" onclick="showSection('memo')">回忆录</div>
+                <div class="menu-item" onclick="showSection('mood')">记心情</div>
+                <div class="menu-item" onclick="missYou()">想你了</div>
+            </div>
+        </div>
+
+        <div id="content-page" class="card hidden">
+            <div id="page-detail"></div>
+            <br>
+            <button onclick="backToMain()">返回主页</button>
+        </div>
+    </div>
+
+    <audio id="audio-element" loop></audio>
+
+    <script>
+        let currentUser = "";
+        const playlist = ["music/1.mp3", "music/2.mp3"]; // 填入你的文件名
+        let currentMusicIdx = 0;
+        const audio = document.getElementById('audio-element');
+
+        // 登录逻辑
+        function login(user) {
+            currentUser = user;
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('main-page').classList.remove('hidden');
+            document.getElementById('welcome-msg').innerText = "欢迎回来, " + user;
+            loadBgImages(); 
+        }
+
+        // 核心：调用后端 API
+        async function api(action, data = {}) {
+            const res = await fetch('/api/data', {
+                method: 'POST',
+                body: JSON.stringify({ action, user: currentUser, ...data })
+            });
+            return res.json();
+        }
+
+        // 功能切换
+        async function showSection(type) {
+            document.getElementById('main-page').classList.add('hidden');
+            const page = document.getElementById('content-page');
+            const detail = document.getElementById('page-detail');
+            page.classList.remove('hidden');
+
+            if(type === 'mood') {
+                detail.innerHTML = `<h3>记心情</h3><textarea id="mood-text" rows="4"></textarea><br>
+                                   <button onclick="saveMood()">保存</button>`;
+            } else if(type === 'memo') {
+                const logs = await api('getMemos');
+                detail.innerHTML = '<h3>回忆录</h3><div id="memo-list" style="max-height:300px;overflow-y:auto"></div>';
+                const list = document.getElementById('memo-list');
+                logs.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = item.user === '黄泽钰' ? 'memo-left' : 'memo-right';
+                    div.innerHTML = `<small>${item.time}</small><br><b>${item.user}:</b> ${item.content}`;
+                    list.appendChild(div);
+                });
+            } else if(type === 'album') {
+                detail.innerHTML = `<h3>相册</h3><input type="file" id="img-input" accept="image/*">
+                                   <button onclick="uploadImg()">上传</button><div id="img-list"></div>`;
+                refreshAlbum();
+            }
+        }
+
+        async function saveMood() {
+            const content = document.getElementById('mood-text').value;
+            await api('addMemo', { content });
+            alert('记录成功'); backToMain();
+        }
+
+        async function uploadImg() {
+            const file = document.getElementById('img-input').files[0];
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                await api('addPhoto', { image: reader.result });
+                refreshAlbum();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function refreshAlbum() {
+            const photos = await api('getPhotos');
+            const list = document.getElementById('img-list');
+            list.innerHTML = '';
+            photos.forEach(p => {
+                const img = document.createElement('img');
+                img.src = p.data; img.style.width = '50px';
+                const btn = document.createElement('button');
+                btn.innerText = '删'; btn.onclick = async () => { await api('delPhoto', {id: p.id}); refreshAlbum(); };
+                list.append(img, btn);
+            });
+        }
+
+        function missYou() { alert("我也想你啦！❤️"); }
+        function backToMain() {
+            document.getElementById('content-page').classList.add('hidden');
+            document.getElementById('main-page').classList.remove('hidden');
+        }
+
+        // 音乐控制
+        function toggleMusic() { 
+            if(audio.src === "") audio.src = playlist[0];
+            audio.paused ? audio.play() : audio.pause();
+            document.getElementById('play-btn').innerText = audio.paused ? "▶️" : "⏸️";
+        }
+        function nextMusic() { currentMusicIdx = (currentMusicIdx+1)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
+        function setVolume(v) { audio.volume = v; }
+
+        // 自动背景虚化播放
+        async function loadBgImages() {
+            const photos = await api('getPhotos');
+            if(photos.length > 0) {
+                setInterval(() => {
+                    const randomImg = photos[Math.floor(Math.random() * photos.length)].data;
+                    document.getElementById('bg-slider').style.backgroundImage = `url(${randomImg})`;
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
