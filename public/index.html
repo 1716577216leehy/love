@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>给黄泽钰搭的小窝</title>
     <style>
-        /* 核心配色：马卡龙粉、淡甜奶油、柔雾蓝 */
         :root {
             --soft-pink: #ffc2d1;
             --deep-pink: #fb6f92;
             --cream: #fff5f5;
             --boy-blue: #a2d2ff;
-            --glass: rgba(255, 255, 255, 0.7);
+            --glass: rgba(255, 255, 255, 0.75);
         }
 
         body, html {
@@ -20,16 +19,15 @@
             color: #555; overflow: hidden;
         }
 
-        /* 动态模糊背景 */
+        /* 固定浪漫粉色渐变背景 */
         #bg-slider {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; filter: blur(25px) brightness(0.9);
-            background: linear-gradient(135deg, #ffe5ec, #ffc2d1);
-            background-size: cover; background-position: center;
-            transition: background-image 2.5s ease-in-out;
+            z-index: -1;
+            background: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%);
+            background-size: cover;
         }
 
-        /* 音乐控制面板 - 更精致 */
+        /* 音乐控制面板 */
         #music-player {
             position: fixed; top: 20px; right: 20px; z-index: 100;
             background: var(--glass); padding: 12px 20px; border-radius: 30px;
@@ -42,7 +40,6 @@
         }
         #music-player button:hover { transform: scale(1.2); }
 
-        /* 容器样式 */
         .container {
             height: 100vh; display: flex; justify-content: center; align-items: center;
         }
@@ -57,7 +54,6 @@
 
         h1, h2, h3 { color: var(--deep-pink); letter-spacing: 2px; }
 
-        /* 柔和按钮样式 */
         .btn {
             padding: 12px 25px; border: none; border-radius: 25px;
             cursor: pointer; transition: all 0.3s ease;
@@ -69,7 +65,6 @@
         .btn-primary { background: var(--deep-pink); color: white; }
         .btn-blue { background: var(--boy-blue); color: white; }
 
-        /* 菜单网格 */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
         .menu-item {
             padding: 30px 10px; background: white; border-radius: 25px;
@@ -78,31 +73,29 @@
         }
         .menu-item:hover { background: var(--soft-pink); color: white; }
 
-        /* 相册预览专区 */
+        /* 相册：预览在上，操作在下 */
         .album-view {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 15px; margin-bottom: 20px; padding: 10px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px; margin-bottom: 25px; padding: 10px;
         }
-        .album-img-wrapper { position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; }
+        .album-img-wrapper { position: relative; border-radius: 20px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .album-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
         .del-btn {
-            position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.3);
-            color: white; border-radius: 50%; width: 20px; height: 20px;
-            font-size: 12px; border: none; cursor: pointer;
+            position: absolute; top: 8px; right: 8px; background: rgba(251, 111, 146, 0.9);
+            color: white; border-radius: 50%; width: 26px; height: 26px;
+            font-size: 16px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
 
-        /* 记心情输入框 */
         textarea {
-            width: 100%; border-radius: 20px; border: 1px solid #ffe5ec;
-            padding: 15px; outline: none; font-family: inherit;
-            background: rgba(255,255,255,0.5); margin-bottom: 15px;
+            width: 100%; border-radius: 25px; border: 1px solid #ffe5ec;
+            padding: 20px; outline: none; font-family: inherit; font-size: 1rem;
+            background: rgba(255,255,255,0.8); margin-bottom: 15px; box-sizing: border-box;
         }
 
-        /* 回忆录气泡 */
-        .memo-item { margin: 15px 0; padding: 15px; border-radius: 20px; position: relative; max-width: 80%; }
-        .memo-left { background: #fff; color: var(--deep-pink); align-self: flex-start; margin-right: auto; text-align: left; border-bottom-left-radius: 5px;}
-        .memo-right { background: var(--boy-blue); color: white; align-self: flex-end; margin-left: auto; text-align: right; border-bottom-right-radius: 5px;}
-        .memo-time { font-size: 10px; opacity: 0.7; display: block; margin-bottom: 5px; }
+        .memo-item { margin: 15px 0; padding: 18px; border-radius: 25px; position: relative; max-width: 85%; line-height: 1.5; }
+        .memo-left { background: #fff; color: var(--deep-pink); align-self: flex-start; margin-right: auto; text-align: left; border-bottom-left-radius: 5px; box-shadow: 5px 5px 15px rgba(251, 111, 146, 0.1); }
+        .memo-right { background: var(--boy-blue); color: white; align-self: flex-end; margin-left: auto; text-align: right; border-bottom-right-radius: 5px; box-shadow: -5px 5px 15px rgba(162, 210, 255, 0.3); }
+        .memo-time { font-size: 11px; opacity: 0.7; display: block; margin-bottom: 5px; }
 
         .hidden { display: none; }
     </style>
@@ -140,7 +133,7 @@
 
         <div id="content-page" class="card hidden">
             <div id="page-detail"></div>
-            <hr style="border: 0.5px solid #ffe5ec; margin: 20px 0;">
+            <hr style="border: 0.5px solid #ffe5ec; margin: 25px 0;">
             <button class="btn" onclick="backToMain()">⬅️ 返回主页</button>
         </div>
     </div>
@@ -149,12 +142,14 @@
 
     <script>
         let currentUser = "";
+        // 音乐播放列表
         const playlist = [
-    "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/M500004RMLd70LGo7K.mp3",
-    "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/xiaojiuwo.mp3",
-    "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/jiangnan.mp3",
-];
+            "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/M500004RMLd70LGo7K.mp3",
+            "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/xiaojiuwo.mp3",
+            "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/jiangnan.mp3"
+        ]; 
         let currentMusicIdx = 0;
+        let audioInitiated = false;
         const audio = document.getElementById('audio-element');
 
         async function api(action, data = {}) {
@@ -167,11 +162,39 @@
 
         function login(user) {
             currentUser = user;
+            
+            // 专属弹窗逻辑
+            if (user === '黄泽钰') {
+                alert("原来是小狗呀~我亲亲 💋");
+            } else if (user === '李鸿运') {
+                alert("大胆！竟然想篡位！😤");
+            }
+
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('main-page').classList.remove('hidden');
             document.getElementById('welcome-msg').innerText = "你好呀, " + user;
-            loadBgImages(); 
+            
+            initAudio(); 
         }
+
+        function initAudio() {
+            if (!audioInitiated) {
+                audio.src = playlist[currentMusicIdx];
+                audio.play().then(() => {
+                    document.getElementById('play-btn').innerText = "⏸️";
+                }).catch(e => console.log("浏览器限制自动播放"));
+                audioInitiated = true;
+            }
+        }
+
+        function toggleMusic() { 
+            if (!audioInitiated) initAudio();
+            audio.paused ? audio.play() : audio.pause();
+            document.getElementById('play-btn').innerText = audio.paused ? "▶️" : "⏸️";
+        }
+        function nextMusic() { currentMusicIdx = (currentMusicIdx+1)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); document.getElementById('play-btn').innerText = "⏸️";}
+        function prevMusic() { currentMusicIdx = (currentMusicIdx-1+playlist.length)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); document.getElementById('play-btn').innerText = "⏸️";}
+        function setVolume(v) { audio.volume = v; }
 
         async function showSection(type) {
             document.getElementById('main-page').classList.add('hidden');
@@ -185,7 +208,7 @@
                                    <button class="btn btn-primary" onclick="saveMood()">保存心情</button>`;
             } else if(type === 'memo') {
                 const logs = await api('getMemos');
-                detail.innerHTML = '<h3>我们的回忆录</h3><div id="memo-list" style="display:flex; flex-direction:column;"></div>';
+                detail.innerHTML = '<h3>我们的回忆录</h3><div id="memo-list" style="display:flex; flex-direction:column; gap:10px;"></div>';
                 const list = document.getElementById('memo-list');
                 logs.forEach(item => {
                     const div = document.createElement('div');
@@ -196,16 +219,15 @@
             } else if(type === 'album') {
                 detail.innerHTML = `<h3>浪漫时刻</h3>
                                    <div class="album-view" id="img-list"></div>
-                                   <div style="background:#fff; padding:15px; border-radius:20px; border:1px dashed var(--soft-pink)">
+                                   <div style="background:rgba(255,255,255,0.5); padding:20px; border-radius:25px; border:2px dashed var(--soft-pink)">
                                        <input type="file" id="img-input" accept="image/*" style="display:none">
-                                       <label for="img-input" style="cursor:pointer; color:var(--deep-pink)">点击选择照片</label><br><br>
-                                       <button class="btn btn-primary" onclick="uploadImg()">开始上传</button>
+                                       <label for="img-input" style="cursor:pointer; color:var(--deep-pink); font-weight:bold;">✨ 点击选择照片 ✨</label><br><br>
+                                       <button class="btn btn-primary" onclick="uploadImg()">上传到小窝</button>
                                    </div>`;
                 refreshAlbum();
             }
         }
 
-        // --- 以下逻辑保持不变 ---
         async function saveMood() {
             const content = document.getElementById('mood-text').value;
             if(!content) return;
@@ -237,55 +259,17 @@
         }
 
         async function deletePhoto(id) {
-            if(confirm('确定要删除这张照片吗？')) {
+            if(confirm('要删除这张珍贵的回忆吗？')) {
                 await api('delPhoto', {id});
                 refreshAlbum();
             }
         }
 
-        function missYou() { 
-            const colors = ['#ffafbd', '#ffc3a0', '#ffafbd'];
-            document.body.style.backgroundColor = colors[Math.floor(Math.random()*3)];
-            alert("我也想你啦！❤️"); 
-        }
-
+        function missYou() { alert("我也想你啦！❤️"); }
         function backToMain() {
             document.getElementById('content-page').classList.add('hidden');
             document.getElementById('main-page').classList.remove('hidden');
         }
-
-        function toggleMusic() { 
-            if(audio.src === "") audio.src = playlist[0];
-            audio.paused ? audio.play() : audio.pause();
-            document.getElementById('play-btn').innerText = audio.paused ? "▶️" : "⏸️";
-        }
-        function nextMusic() { currentMusicIdx = (currentMusicIdx+1)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
-        function prevMusic() { currentMusicIdx = (currentMusicIdx-1+playlist.length)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
-        function setVolume(v) { audio.volume = v; }
-
-        async function loadBgImages() {
-            const photos = await api('getPhotos');
-            if(photos.length > 0) {
-                const changeBg = () => {
-                    const randomImg = photos[Math.floor(Math.random() * photos.length)].data;
-                    document.getElementById('bg-slider').style.backgroundImage = `url(${randomImg})`;
-                };
-                changeBg();
-                setInterval(changeBg, 8000);
-            }
-        }
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
