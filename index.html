@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>给泽钰的专属小窝</title>
+  <style>
+    /* ✨ 全局样式 */
+    body { margin: 0; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; }
+    
+    /* 🌸 背景层 */
+    #bg-layer {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-size: cover; background-position: center;
+      filter: blur(15px) brightness(0.9);
+      transition: background-image 1.5s ease-in-out;
+      z-index: -1;
+    }
+
+    /* 📦 布局容器 */
+    .center {
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      height: 100vh; text-align: center; color: #5a2a2a;
+      animation: fadeIn 0.8s ease; position: relative; z-index: 1;
+    }
+    .hidden { display: none !important; }
+
+    /* 🔘 按钮 */
+    button {
+      padding: 12px 24px; font-size: 16px; border-radius: 50px; border: none;
+      background: rgba(255, 143, 171, 0.95); color: white; cursor: pointer; margin: 8px;
+      box-shadow: 0 4px 12px rgba(255, 111, 145, 0.3); transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.05); background: #ff6f91; }
+
+    /* 📝 输入框 */
+    textarea {
+      width: 80%; max-width: 400px; height: 100px; padding: 10px; border-radius: 10px;
+      border: 2px solid #ffc2d1; background: rgba(255,255,255,0.9); outline: none;
+    }
+
+    /* 📸 相册网格 */
+    #gallery-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 8px; width: 90%; max-width: 500px; max-height: 40vh; overflow-y: auto;
+      background: rgba(255,255,255,0.5); padding: 10px; border-radius: 12px; margin-bottom: 15px;
+    }
+    .photo-item { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; cursor: pointer; }
+
+    /* 🎵 音乐控件 */
+    .music-player { position: fixed; top: 15px; right: 15px; z-index: 10; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 20px; font-size: 12px; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<div id="bg-layer"></div>
+
+<div class="music-player">
+  <span>🎵 BGM </span>
+  <button style="padding:4px 8px; font-size:12px; margin:0;" onclick="togglePlay()">⏯</button>
+</div>
+<audio id="audio" loop></audio>
+
+<div id="cover" class="center">
+  <h1 style="font-size: 2rem; text-shadow: 0 2px 4px rgba(255,255,255,0.5);">🏠 给泽钰的小窝</h1>
+  <button onclick="enterHome()">敲门进入 ❤️</button>
+</div>
+
+<div id="home" class="center hidden">
+  <h2>欢迎回家</h2>
+  <div>
+    <button onclick="switchPage('album')">📸 云相册</button>
+    <button onclick="switchPage('now')">✍️ 记心情</button>
+    <button onclick="switchPage('miss')">💬 想你了</button>
+  </div>
+</div>
+
+<div id="album" class="center hidden">
+  <h3>📸 我们的回忆 (实时同步)</h3>
+  <div id="gallery-grid"><p style="font-size:12px">加载中...</p></div>
+  
+  <input type="file" id="uploadInput" accept="image/*" style="display: none;" onchange="uploadImage(this)">
+  <button onclick="document.getElementById('uploadInput').click()" style="background:#a2d2ff;">➕ 上传照片 (自动同步)</button>
+  <button onclick="switchPage('home')">返回</button>
+</div>
+
+<div id="now" class="center hidden">
+  <h3>✍️ 写给我的话</h3>
+  <textarea id="moodInput" placeholder="今天发生了什么？..."></textarea><br>
+  <button onclick="saveMood()">保存</button>
+  <button onclick="switchPage('home')">返回</button>
+</div>
+
+<div id="miss" class="center hidden">
+  <h3>Don't Worry</h3>
+  <p>无论多晚，我都在。</p>
+  <button onclick="switchPage('home')">返回</button>
+</div>
+
+<script>
+  /* === 配置区 === */
+  const defaultBgs = ["bg/1.jpg", "bg/2.jpg", "bg/3.jpg"]; // 确保bg文件夹里有这些图
+  const songs = ["music/song1.mp3", "music/song2.mp3"];   // 确保music文件夹里有这些歌
+  
+  let allImages = [...defaultBgs];
+  let bgIndex = 0;
+  let audio = document.getElementById("audio");
+
+  /* === 初始化 === */
+  window.onload = function() {
+    loadCloudImages(); // 从云端拉取图片
+    setInterval(nextBg, 8000); // 8秒换背景
+    changeBg(defaultBgs[0]);
+    audio.src = songs[0];
+  };
+
+  function enterHome() {
+    switchPage('home');
+    audio.play().catch(() => console.log("需交互才能播放"));
+  }
+
+  function switchPage(id) {
+    document.querySelectorAll('.center').forEach(el => el.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  /* === 背景轮播 === */
+  function changeBg(url) {
+    document.getElementById("bg-layer").style.backgroundImage = `url('${url}')`;
+  }
+  function nextBg() {
+    bgIndex = (bgIndex + 1) % allImages.length;
+    changeBg(allImages[bgIndex]);
+  }
+
+  /* === 云端核心逻辑 (API调用) === */
+  
+  // 1. 获取云端图片列表
+  async function loadCloudImages() {
+    try {
+      const res = await fetch('/api/list'); // 调用 functions/api/list.js
+      if (res.ok) {
+        const cloudData = await res.json();
+        // 合并默认图片和云端图片
+        allImages = defaultBgs.concat(cloudData);
+        renderGallery();
+      }
+    } catch (err) { console.error("云端连接失败", err); renderGallery(); }
+  }
+
+  // 2. 上传图片
+  async function uploadImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    // 压缩/限制大小 (这里简单限制2MB，防止KV溢出)
+    if (file.size > 2 * 1024 * 1024) return alert("图片太大了，请选张小点的(2MB内)🥺");
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const base64 = e.target.result;
+      
+      // 乐观更新：先在本地显示，不等服务器
+      allImages.push(base64);
+      changeBg(base64);
+      renderGallery();
+      alert("正在后台上传，请稍等...");
+
+      // 发送给 Cloudflare
+      try {
+        await fetch('/api/upload', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ image: base64, time: Date.now() })
+        });
+        alert("✅ 上传成功！以后打开都在！");
+      } catch (err) {
+        alert("❌ 上传失败，可能是网络问题");
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function renderGallery() {
+    const grid = document.getElementById("gallery-grid");
+    grid.innerHTML = "";
+    // 倒序显示，新的在前
+    [...allImages].reverse().forEach(src => {
+      let img = document.createElement("img");
+      img.src = src;
+      img.className = "photo-item";
+      img.onclick = () => changeBg(src);
+      grid.appendChild(img);
+    });
+  }
+
+  /* === 其他功能 === */
+  function togglePlay() { audio.paused ? audio.play() : audio.pause(); }
+  
+  function saveMood() {
+    const val = document.getElementById("moodInput").value;
+    if(val) { alert("已保存到本地 (此处未接云端)"); document.getElementById("moodInput").value = ""; }
+  }
+</script>
+</body>
+</html>
