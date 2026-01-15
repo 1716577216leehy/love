@@ -12,7 +12,6 @@ export async function onRequestPost(context) {
 
     if (action === 'getMissStats') {
         const missLogs = JSON.parse(await KV.get("miss_logs") || "[]");
-        // 逻辑：如果是黄泽钰看，就统计李鸿运发出的思念
         const targetUser = user === "黄泽钰" ? "李鸿运" : "黄泽钰";
         const now = new Date();
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -53,11 +52,11 @@ export async function onRequestPost(context) {
         const memos = JSON.parse(await KV.get("memos") || "[]");
         const now = new Date();
         memos.push({ 
-            memoId: "memo-" + Date.now(), // 唯一ID用于搜索定位
+            memoId: "memo-" + Date.now(), 
             user: user, 
             content: content, 
             time: now.toLocaleString(),
-            rawDate: now.toISOString().split('T')[0] // 纯日期格式便于搜索比较
+            rawDate: now.toISOString().split('T')[0] 
         });
         await KV.put("memos", JSON.stringify(memos));
         return new Response(JSON.stringify({ status: "ok" }));
@@ -92,6 +91,5 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify({ status: "ok" }));
     }
 
-    // 如果 action 都不匹配
     return new Response(JSON.stringify({ error: "Invalid action" }), { status: 400 });
 }
