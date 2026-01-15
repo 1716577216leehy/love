@@ -15,47 +15,45 @@
         }
 
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'PingFang SC', sans-serif; color: #555; overflow: hidden; }
-
         #bg-slider { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%); }
-
         #music-player { position: fixed; top: 20px; right: 20px; z-index: 100; background: var(--glass); padding: 12px 20px; border-radius: 30px; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 12px; border: 1px solid white; }
         #music-player button { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
-
         .container { height: 100vh; display: flex; justify-content: center; align-items: center; }
-
-        .card { background: var(--glass); padding: 2rem; border-radius: 35px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); backdrop-filter: blur(15px); border: 2px solid white; text-align: center; width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; position: relative; scroll-behavior: smooth; }
-
+        .card { background: var(--glass); padding: 2rem; border-radius: 35px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); backdrop-filter: blur(15px); border: 2px solid white; text-align: center; width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; position: relative; }
         h1, h2, h3 { color: var(--deep-pink); }
-
         .btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; transition: 0.3s; font-size: 0.9rem; margin: 5px; background: white; color: var(--deep-pink); }
         .btn-primary { background: var(--deep-pink); color: white; }
         .btn-blue { background: var(--boy-blue); color: white; }
 
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .menu-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; transition: 0.3s; color: var(--deep-pink); font-weight: bold; }
-        .menu-item:hover { transform: translateY(-3px); background: var(--light-pink); }
-
-        .group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .group-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; position: relative; color: var(--deep-pink); font-weight: bold; }
+        /* 搜索框样式 */
+        .search-box { background: white; padding: 15px; border-radius: 20px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .search-input { border: 1px solid #ffe5ec; border-radius: 15px; padding: 8px 12px; outline: none; font-size: 14px; }
         
-        .album-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin: 15px 0; }
-        .album-img-wrapper { position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; }
-        .album-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .bottom-left-btn { position: absolute; bottom: 15px; left: 20px; font-size: 12px; color: var(--deep-pink); cursor: pointer; opacity: 0.8; }
-
-        .memo-item { margin: 10px 0; padding: 15px; border-radius: 20px; max-width: 85%; font-size: 14px; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); }
+        /* 记录气泡 */
+        .memo-item { margin: 10px 0; padding: 15px; border-radius: 20px; max-width: 85%; font-size: 14px; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); transition: background 0.5s; }
         .memo-left { background: var(--light-pink); color: var(--deep-pink); margin-right: auto; text-align: left; border-bottom-left-radius: 2px; }
         .memo-right { background: var(--boy-blue); color: white; margin-left: auto; text-align: right; border-bottom-right-radius: 2px; }
+        
+        /* 闪烁高亮效果 */
+        @keyframes highlight-fade {
+            0% { background: #ffdada; transform: scale(1.02); }
+            50% { background: #ffdada; transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .highlight { animation: highlight-fade 1s ease 2; border: 2px solid var(--deep-pink); }
 
         .hidden { display: none; }
+        #memo-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding: 10px; scroll-behavior: smooth; }
         textarea { width: 100%; border-radius: 20px; border: 1px solid #ffe5ec; padding: 15px; box-sizing: border-box; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; transition: 0.3s; color: var(--deep-pink); font-weight: bold; }
+        .group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .group-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; position: relative; color: var(--deep-pink); font-weight: bold; }
+        .bottom-left-btn { position: absolute; bottom: 15px; left: 20px; font-size: 12px; color: var(--deep-pink); cursor: pointer; opacity: 0.8; }
     </style>
 </head>
 <body>
-
     <div id="bg-slider"></div>
-
     <div id="music-player">
         <button onclick="prevMusic()">⏮️</button>
         <button id="play-btn" onclick="toggleMusic()">▶️</button>
@@ -94,11 +92,12 @@
 
     <script>
         let currentUser = "";
-        let currentGroup = "";
+        let allMemos = []; 
         const playlist = [
             "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/M500004RMLd70LGo7K.mp3",
             "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/xiaojiuwo.mp3",
-            "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/jiangnan.mp3"]; 
+            "https://github.com/1716577216leehy/love/raw/refs/heads/main/public/music/jiangnan.mp3"
+        ]; 
         let currentMusicIdx = 0;
         const audio = document.getElementById('audio-element');
         audio.addEventListener('ended', nextMusic);
@@ -108,18 +107,18 @@
             return res.json();
         }
 
-        function login(user) {
+       function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
             if (user === '黄泽钰') {
                 if (pwd === 'ilovelhy') {
                     alert("原来是小狗呀~我亲亲 💋");
                     enter(user);
                 } else {
-                    alert("小笨蛋~输错啦");
+                    alert("小笨蛋~输错啦~");
                 }
             } else if (user === '李鸿运') {
                 if (pwd === 'ilovehzy') {
-                    alert("小笨蛋，进来偷看啦？");
+                    alert("宝宝真棒！猜对密码啦！");
                     enter(user);
                 } else {
                     alert("大胆！竟然想篡位！😤");
@@ -135,20 +134,7 @@
             initAudio();
         }
 
-        async function missYou() {
-            await api('missYou');
-            alert("我也想你啦！❤️");
-        }
-
-        async function checkMissStats() {
-            const stats = await api('getMissStats');
-            if(currentUser === '黄泽钰') {
-                alert(`哇塞，李鸿运今天想了你 ${stats.today} 次，本月想了你 ${stats.month} 次，今年想了你 ${stats.year} 次，黄泽钰真是个幸福的小朋友~`);
-            } else {
-                alert(`哇塞，黄泽钰今天想了你 ${stats.today} 次，本月想了你 ${stats.month} 次，今年想了你 ${stats.year} 次，黄泽钰真是个乖巧可爱温柔大方善良美丽的小朋友~`);
-            }
-        }
-
+        // --- 核心：回忆录搜索与展示 ---
         async function showSection(type) {
             document.getElementById('main-page').classList.add('hidden');
             const page = document.getElementById('content-page');
@@ -159,27 +145,94 @@
             if(type === 'mood') {
                 detail.innerHTML = `<h3>记心情</h3><textarea id="mood-text" rows="5" placeholder="此刻想说什么..."></textarea><br><button class="btn btn-primary" onclick="saveMood()">保存</button>`;
             } else if(type === 'memo') {
-                const logs = await api('getMemos');
-                // 恢复为正序排列
-                detail.innerHTML = `<h3>回忆录</h3>
-                    <button class="btn btn-blue" style="margin-bottom:15px" onclick="checkMissStats()">🔍 看看TA有没有想我</button>
-                    <div id="memo-list" style="display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto;padding:10px"></div>`;
-                
-                const list = document.getElementById('memo-list');
-                logs.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = `memo-item ${item.user === '黄泽钰' ? 'memo-left' : 'memo-right'}`;
-                    div.innerHTML = `<span style="font-size:10px;opacity:0.6">${item.time}</span><br>${item.content}`;
-                    list.appendChild(div);
-                });
-
-                // 核心改动：自动滚动到最底部
-                setTimeout(() => {
-                    list.scrollTop = list.scrollHeight;
-                }, 100);
+                allMemos = await api('getMemos');
+                renderMemoPage();
             }
         }
 
+        function renderMemoPage() {
+            const detail = document.getElementById('page-detail');
+            detail.innerHTML = `
+                <h3>回忆录</h3>
+                <button class="btn btn-blue" style="margin-bottom:10px" onclick="checkMissStats()">🔍 看看TA有没有想我</button>
+                
+                <div class="search-box">
+                    <div style="display:flex; gap:5px;">
+                        <input type="date" id="search-date" class="search-input" style="flex:1">
+                        <input type="text" id="search-text" class="search-input" style="flex:2" placeholder="搜搜关键词...">
+                    </div>
+                    <button class="btn btn-primary" style="margin:0" onclick="handleSearch()">开始搜索</button>
+                </div>
+
+                <div id="memo-list"></div>
+            `;
+            renderMemos(allMemos.slice().reverse()); // 默认倒序
+        }
+
+        function renderMemos(data) {
+            const list = document.getElementById('memo-list');
+            list.innerHTML = '';
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.id = item.memoId || ""; // 绑定唯一ID用于定位
+                div.className = `memo-item ${item.user === '黄泽钰' ? 'memo-left' : 'memo-right'}`;
+                div.innerHTML = `<span style="font-size:10px;opacity:0.6">${item.time}</span><br>${item.content}`;
+                list.appendChild(div);
+            });
+        }
+
+        function handleSearch() {
+            const dateVal = document.getElementById('search-date').value;
+            const textVal = document.getElementById('search-text').value.toLowerCase();
+            
+            // 找出符合条件的记录
+            const results = allMemos.filter(m => {
+                const matchDate = dateVal ? (m.rawDate === dateVal) : true;
+                const matchText = textVal ? (m.content.toLowerCase().includes(textVal)) : true;
+                return matchDate && matchText;
+            });
+
+            if (results.length === 0) {
+                alert("哎呀，没找到相关的记录呢...");
+                return;
+            }
+
+            // 搜索结果：如果只有一个，直接定位；如果有多个，渲染列表
+            if (results.length === 1 || (dateVal && textVal)) {
+                // 定位到其中最新的那一条
+                const targetId = results[results.length - 1].memoId;
+                renderMemos(allMemos.slice().reverse()); // 先确保所有内容都加载了
+                setTimeout(() => scrollToMemo(targetId), 100);
+            } else {
+                // 如果结果很多，先只显示结果，点击后再定位（逻辑简化，此处直接显示全部并滚动到第一条结果）
+                renderMemos(allMemos.slice().reverse());
+                const targetId = results[results.length - 1].memoId;
+                setTimeout(() => scrollToMemo(targetId), 100);
+            }
+        }
+
+        function scrollToMemo(id) {
+            const target = document.getElementById(id);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('highlight');
+                setTimeout(() => target.classList.remove('highlight'), 3000);
+            }
+        }
+
+        // --- 其余相册/音乐逻辑保持不变 ---
+        async function missYou() { await api('missYou'); alert("思念已送达！❤️"); }
+        async function checkMissStats() {
+            const stats = await api('getMissStats');
+            const msg = currentUser === '黄泽钰' ? 
+                `哇塞，李鸿运今天想了你 ${stats.today} 次，本月想了你 ${stats.month} 次，今年想了你 ${stats.year} 次，黄泽钰真是个幸福的小朋友` :
+                `哇塞，黄泽钰今天想了你 ${stats.today} 次，本月想了你 ${stats.month} 次，今年想了你 ${stats.year} 次，黄泽钰真是个乖巧可爱温柔大方善良美丽的小朋友`;
+            alert(msg);
+        }
+        async function saveMood() {
+            const content = document.getElementById('mood-text').value;
+            if(content) { await api('addMemo', { content }); backToMain(); }
+        }
         async function showGroups() {
             document.getElementById('main-page').classList.add('hidden');
             const page = document.getElementById('content-page');
@@ -191,15 +244,13 @@
             const list = document.getElementById('group-list');
             groups.forEach(g => {
                 const count = photos.filter(p => p.group === g).length;
-                const div = document.createElement('div');
-                div.className = 'group-item';
+                const div = document.createElement('div'); div.className = 'group-item';
                 div.innerHTML = `📂 ${g}<br><small>${count} 张</small>`;
                 div.onclick = () => openGroup(g);
                 list.appendChild(div);
             });
             document.getElementById('bottom-controls').innerHTML = `<div class="bottom-left-btn" onclick="addNewGroup()">＋ 新建分组</div>`;
         }
-
         async function openGroup(g) {
             currentGroup = g;
             const detail = document.getElementById('page-detail');
@@ -212,51 +263,25 @@
             refreshGroupPhotos();
             document.getElementById('bottom-controls').innerHTML = `<div class="bottom-left-btn" onclick="showGroups()">⬅ 返回</div>`;
         }
-
         async function refreshGroupPhotos() {
             const photos = await api('getPhotos');
-            const list = document.getElementById('img-list');
-            list.innerHTML = '';
-            // 相册通常还是最新的放前面比较好找，如果你也想要正序，把这里的 .reverse() 删掉即可
+            const list = document.getElementById('img-list'); list.innerHTML = '';
             photos.filter(p => p.group === currentGroup).reverse().forEach(p => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'album-img-wrapper';
-                wrapper.innerHTML = `<img src="${p.data}"><div style="position:absolute;top:5px;right:5px">
-                    <button class="btn" style="padding:5px;opacity:0.8" onclick="deletePhoto(${p.id})">×</button>
-                </div>`;
+                const wrapper = document.createElement('div'); wrapper.className = 'album-img-wrapper';
+                wrapper.innerHTML = `<img src="${p.data}"><div style="position:absolute;top:5px;right:5px"><button class="btn" style="padding:5px;opacity:0.8" onclick="deletePhoto(${p.id})">×</button></div>`;
                 list.appendChild(wrapper);
             });
         }
-
         async function uploadToGroup() {
             const file = document.getElementById('img-input').files[0];
             if(!file) return;
             const reader = new FileReader();
-            reader.onloadend = async () => {
-                await api('addPhoto', { image: reader.result, groupName: currentGroup });
-                refreshGroupPhotos();
-            };
+            reader.onloadend = async () => { await api('addPhoto', { image: reader.result, groupName: currentGroup }); refreshGroupPhotos(); };
             reader.readAsDataURL(file);
         }
-
-        async function addNewGroup() {
-            const name = prompt("请输入新分组名称:");
-            if(name) { await api('addGroup', {groupName: name}); showGroups(); }
-        }
-
-        async function saveMood() {
-            const content = document.getElementById('mood-text').value;
-            if(content) { await api('addMemo', { content }); backToMain(); }
-        }
-
-        async function deletePhoto(id) {
-            if(confirm('删除这张回忆？')) { await api('delPhoto', {id}); refreshGroupPhotos(); }
-        }
-
-        function initAudio() {
-            audio.src = playlist[currentMusicIdx];
-            audio.play().catch(() => {});
-        }
+        async function addNewGroup() { const name = prompt("请输入新分组名称:"); if(name) { await api('addGroup', {groupName: name}); showGroups(); } }
+        async function deletePhoto(id) { if(confirm('删除这张回忆？')) { await api('delPhoto', {id}); refreshGroupPhotos(); } }
+        function initAudio() { audio.src = playlist[currentMusicIdx]; audio.play().catch(() => {}); }
         function toggleMusic() { audio.paused ? audio.play() : audio.pause(); }
         function nextMusic() { currentMusicIdx = (currentMusicIdx+1)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
         function prevMusic() { currentMusicIdx = (currentMusicIdx-1+playlist.length)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
