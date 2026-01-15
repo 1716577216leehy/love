@@ -111,8 +111,8 @@
         function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
             if (user === '黄泽钰' && pwd === 'ilovelhy') { alert("原来是小狗呀~我亲亲 💋"); enter(user); }
-            else if (user === '李鸿运' && pwd === 'ilovehzy') { alert("大胆！竟然想篡位！😤"); enter(user); }
-            else { alert("口令不对哦~"); }
+            else if (user === '李鸿运' && pwd === 'ilovehzy') { alert("小笨蛋，进来偷看来啦？"); enter(user); }
+            else { alert("大胆！竟然想篡位！😤"); }
         }
 
         function enter(user) {
@@ -125,7 +125,7 @@
 
         async function missYou() {
             await api('missYou');
-            alert("思念已送达！❤️");
+            alert("我也想你啦！❤️");
         }
 
         async function checkMissStats() {
@@ -250,3 +250,4 @@
     </script>
 </body>
 </html>
+
