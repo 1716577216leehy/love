@@ -34,13 +34,9 @@
         .container { height: 100vh; display: flex; justify-content: center; align-items: center; perspective: 1000px; }
 
         .card { 
-            background: var(--glass); 
-            padding: 1.5rem; border-radius: 35px; 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.05); 
-            backdrop-filter: blur(15px); border: 2px solid white; 
-            text-align: center; width: 90%; 
-            max-width: 550px; height: 85vh; max-height: 85vh; 
-            overflow: hidden; display: flex; flex-direction: column;
+            background: var(--glass); padding: 1.5rem; border-radius: 35px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); 
+            backdrop-filter: blur(15px); border: 2px solid white; text-align: center; width: 90%; 
+            max-width: 550px; height: 85vh; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;
             position: relative; transform-origin: left center; transition: all 0.5s;
         }
 
@@ -50,15 +46,11 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(251, 111, 146, 0.3); border-radius: 10px; }
 
-        .menu-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; overflow-y: auto; padding: 5px; 
-        }
-
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; overflow-y: auto; padding: 5px; }
         .menu-item { 
-            background: white; padding: 15px 5px; border-radius: 20px; cursor: pointer; 
-            border: 1px solid #ffe5ec; transition: 0.3s; color: var(--deep-pink); font-weight: bold; 
-            position: relative; overflow: hidden; display: flex; align-items: center; 
-            justify-content: center; text-align: center; font-size: 0.95rem; min-height: 60px; 
+            background: white; padding: 15px 5px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; 
+            transition: 0.3s; color: var(--deep-pink); font-weight: bold; position: relative; overflow: hidden; 
+            display: flex; align-items: center; justify-content: center; text-align: center; font-size: 0.95rem; min-height: 60px; 
         }
         
         .menu-item:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(251, 111, 146, 0.1); }
@@ -160,7 +152,7 @@
         </div>
     </div>
 
-    <audio id="audio-element" preload="auto"></audio>
+    <audio id="audio-element" preload="auto" loop></audio>
 
     <script>
         let currentUser = "";
@@ -177,6 +169,13 @@
         let audioInitiated = false;
         const audio = document.getElementById('audio-element');
         audio.addEventListener('ended', nextMusic);
+
+        // 保底方案：点击页面任何地方尝试激活音频
+        document.body.addEventListener('click', () => {
+            if (!audioInitiated && currentUser) {
+                initAudio();
+            }
+        }, { once: false });
 
         async function api(action, data = {}) {
             const res = await fetch('/api/data', { method: 'POST', body: JSON.stringify({ action, user: currentUser, ...data }) });
@@ -195,18 +194,69 @@
             if (user === '黄泽钰') {
                 if (pwd === 'ilovelhy') {
                     alert("原来是小狗呀~我亲亲 💋");
-                    currentUser = user; initAudio();
+                    currentUser = user; 
+                    initAudio(); // 尝试在登录交互中播放
                     const now = new Date();
-                    if (now.getMonth() === 11 && now.getDate() === 24) startStory();
+                    if (now.getMonth() === 11 && now.getDate() === 24) startStory(); // 12.24
                     else enterMain();
                 } else { alert("小笨蛋输错啦"); }
             } else if (user === '李鸿运') {
                 if (pwd === 'ilovehzy') {
                     alert("宝宝真棒！猜对密码啦！");
-                    currentUser = user; initAudio(); enterMain();
+                    currentUser = user; 
+                    initAudio(); // 尝试在登录交互中播放
+                    enterMain();
                 } else { alert("不对哦~"); }
             }
         }
+
+        function initAudio() {
+            if (!audio.src || audio.src === "") {
+                audio.src = playlist[currentMusicIdx];
+            }
+            audio.volume = document.getElementById('volume').value;
+            
+            // 使用 play() 返回的 Promise 处理拦截
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    document.getElementById('play-btn').innerText = "⏸️";
+                    audioInitiated = true;
+                    console.log("音频播放成功");
+                }).catch(error => {
+                    console.log("音频播放仍被拦截，等待用户进一步交互: ", error);
+                    audioInitiated = false;
+                });
+            }
+        }
+
+        function toggleMusic() { 
+            if (audio.paused) {
+                audio.play().then(() => {
+                    document.getElementById('play-btn').innerText = "⏸️";
+                    audioInitiated = true;
+                });
+            } else {
+                audio.pause();
+                document.getElementById('play-btn').innerText = "▶️";
+            }
+        }
+
+        function nextMusic() { 
+            currentMusicIdx = (currentMusicIdx + 1) % playlist.length; 
+            audio.src = playlist[currentMusicIdx]; 
+            audio.play(); 
+            document.getElementById('play-btn').innerText = "⏸️";
+        }
+
+        function prevMusic() { 
+            currentMusicIdx = (currentMusicIdx - 1 + playlist.length) % playlist.length; 
+            audio.src = playlist[currentMusicIdx]; 
+            audio.play(); 
+            document.getElementById('play-btn').innerText = "⏸️";
+        }
+
+        function setVolume(v) { audio.volume = v; }
 
         const storySteps = [
             "你好~ 黄泽钰小朋友~", "这是一封提前为你准备的信", "我们在一起已经 {days} 天", 
@@ -250,7 +300,6 @@
             if (isBirthday) {
                 document.body.classList.add('birthday-theme');
                 document.getElementById('timer-label').innerText = "🎂 生日快乐！ 🎂";
-                // 只有黄泽钰能看到愿望入口
                 if(currentUser === '黄泽钰') {
                     document.getElementById('wish-menu-container').innerHTML = `<div class="menu-item" onclick="showSection('wish')" style="background:#fff0f3; margin-top:5px; border:2px solid var(--xmas-red); color:var(--xmas-red); font-size: 0.9rem;">🌟 许下的愿望</div>`;
                 }
@@ -263,22 +312,15 @@
             triggerTransition('main-page');
         }
 
-        // --- 核心修改：针对李鸿运的计时器逻辑 ---
         function startLoveTimer() {
             const timerEl = document.getElementById('love-timer');
             const now = new Date();
             const isBirthday = (now.getMonth() === 11 && now.getDate() === 24);
-
             if (isBirthday) {
-                if (currentUser === '李鸿运') {
-                    timerEl.innerText = "今天是她的生日哦"; // 李鸿运提示
-                } else {
-                    timerEl.innerText = "祝黄泽钰小朋友生日快乐！"; // 黄泽钰提示
-                }
-                timerEl.classList.remove('timer-heartbeat');
-                return;
+                if (currentUser === '李鸿运') timerEl.innerText = "今天是她的生日哦";
+                else timerEl.innerText = "祝黄泽钰小朋友生日快乐！";
+                timerEl.classList.remove('timer-heartbeat'); return;
             }
-
             setInterval(() => {
                 const diff = new Date() - startDate;
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -424,10 +466,6 @@
         }
         function backToMain() { enterMain(); }
         function startSnowEffect() { setInterval(() => { const d = document.createElement('div'); d.className = 'decoration'; d.innerText = ['❄️', '🍰', '🎁', '🎄'][Math.floor(Math.random()*4)]; d.style.left = Math.random()*100 + 'vw'; d.style.animationDuration = Math.random()*3+4+'s'; document.body.appendChild(d); setTimeout(() => d.remove(), 7000); }, 500); }
-        function initAudio() { if(!audioInitiated) { audio.src = playlist[currentMusicIdx]; audio.play().catch(()=>{}); audioInitiated = true; } }
-        function toggleMusic() { if(!audioInitiated) initAudio(); audio.paused ? audio.play() : audio.pause(); document.getElementById('play-btn').innerText = audio.paused ? "▶️" : "⏸️"; }
-        function nextMusic() { currentMusicIdx = (currentMusicIdx+1)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
-        function prevMusic() { currentMusicIdx = (currentMusicIdx-1+playlist.length)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
         function setVolume(v) { audio.volume = v; }
     </script>
 </body>
