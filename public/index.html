@@ -183,15 +183,15 @@
             el.classList.add('page-animate');
         }
 
-        // --- 1. 登录逻辑 (日期测试模式: 1月16日) ---
+        // --- 1. 登录逻辑 (正式日期: 12月24日) ---
         function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
             if (user === '黄泽钰' && pwd === 'ilovelhy') {
                 currentUser = user; 
                 initAudio();
                 const now = new Date();
-                // TEST MODE: 检查是否为 1月16日 (月份从0开始，0=1月)
-                if (now.getMonth() === 0 && now.getDate() === 16) {
+                // 11 代表 12月, 24 代表 24日
+                if (now.getMonth() === 11 && now.getDate() === 24) {
                     startStory(); // 进入生日剧情
                 } else {
                     enterMain(); // 进入正常主页
@@ -267,8 +267,8 @@
             document.getElementById('welcome-msg').innerText = "你好呀, " + currentUser;
             
             const now = new Date();
-            // TEST MODE: 检查是否为 1月16日
-            const isBirthday = (now.getMonth() === 0 && now.getDate() === 16);
+            // 正式日期：12月24日
+            const isBirthday = (now.getMonth() === 11 && now.getDate() === 24);
             
             if (isBirthday) {
                 document.body.classList.add('birthday-theme');
@@ -293,8 +293,8 @@
         function startLoveTimer() {
             const timerEl = document.getElementById('love-timer');
             const now = new Date();
-            // TEST MODE: 检查是否为 1月16日
-            if (now.getMonth() === 0 && now.getDate() === 16) {
+            // 正式日期：12月24日
+            if (now.getMonth() === 11 && now.getDate() === 24) {
                 timerEl.innerText = "祝黄泽钰小朋友生日快乐！";
                 timerEl.classList.remove('timer-heartbeat');
                 return;
