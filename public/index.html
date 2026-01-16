@@ -181,16 +181,16 @@
         function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
             if (user === '黄泽钰' && pwd === 'ilovelhy') {
-                alert("原来是小狗呀~我亲亲 💋");
+                alert("原来是小狗呀~我亲亲~");
                 currentUser = user; initAudio();
                 const now = new Date();
                 // 11 代表 12 月, 24 代表 24 日
                 if (now.getMonth() === 11 && now.getDate() === 24) startStory();
                 else enterMain();
             } else if (user === '李鸿运' && pwd === 'ilovehzy') {
-                alert("宝宝真棒！猜对密码啦！");
+                alert("蒸蚌！猜对密码啦宝宝！");
                 currentUser = user; initAudio(); enterMain();
-            } else { alert("口令不对哦~"); }
+            } else { alert("大胆！竟然想篡位！"); }
         }
 
         const storySteps = [
@@ -400,3 +400,4 @@
     </script>
 </body>
 </html>
+
