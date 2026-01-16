@@ -27,7 +27,32 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify(stats));
     }
 
-    // --- 2. 相册分组逻辑 ---
+    // --- 2. 生日愿望管理 (新增部分) ---
+    if (action === 'addWish') {
+        const wishes = JSON.parse(await KV.get("birthday_wishes") || "[]");
+        wishes.push({ 
+            id: Date.now(), 
+            content: content, 
+            time: new Date().toLocaleString(),
+            year: new Date().getFullYear()
+        });
+        await KV.put("birthday_wishes", JSON.stringify(wishes));
+        return new Response(JSON.stringify({ status: "ok" }));
+    }
+
+    if (action === 'getWishes') {
+        const wishes = await KV.get("birthday_wishes") || "[]";
+        return new Response(wishes);
+    }
+
+    if (action === 'delWish') {
+        let wishes = JSON.parse(await KV.get("birthday_wishes") || "[]");
+        wishes = wishes.filter(w => w.id !== id);
+        await KV.put("birthday_wishes", JSON.stringify(wishes));
+        return new Response(JSON.stringify({ status: "ok" }));
+    }
+
+    // --- 3. 相册分组逻辑 ---
     if (action === 'getGroups') {
         const groups = JSON.parse(await KV.get("album_groups") || '["默认分组"]');
         return new Response(JSON.stringify(groups));
@@ -47,7 +72,7 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify({ status: "ok" }));
     }
 
-    // --- 3. 心情记录逻辑 (支持搜索与定位) ---
+    // --- 4. 心情记录逻辑 ---
     if (action === 'addMemo') {
         const memos = JSON.parse(await KV.get("memos") || "[]");
         const now = new Date();
@@ -67,7 +92,7 @@ export async function onRequestPost(context) {
         return new Response(memos);
     }
 
-    // --- 4. 照片管理逻辑 ---
+    // --- 5. 照片管理逻辑 ---
     if (action === 'addPhoto') {
         const photos = JSON.parse(await KV.get("photos") || "[]");
         photos.push({ 
