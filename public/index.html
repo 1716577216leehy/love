@@ -6,47 +6,94 @@
     <title>给黄泽钰搭的小窝</title>
     <style>
         :root {
-            --soft-pink: #ffc2d1;
-            --light-pink: #fff0f3;
-            --deep-pink: #fb6f92;
-            --cream: #fff5f5;
-            --boy-blue: #a2d2ff;
-            --glass: rgba(255, 255, 255, 0.75);
+            --soft-pink: #ffc2d1; --light-pink: #fff0f3; --deep-pink: #fb6f92;
+            --cream: #fff5f5; --boy-blue: #a2d2ff; --glass: rgba(255, 255, 255, 0.75);
+            /* 生日/圣诞配色 */
+            --xmas-red: #d62828; --xmas-green: #2d6a4f;
         }
 
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'PingFang SC', sans-serif; color: #555; overflow: hidden; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'PingFang SC', sans-serif; color: #555; overflow: hidden; transition: background 1s; }
+        
         #bg-slider { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%); }
+        /* 生日当天的特殊背景 */
+        body.birthday-theme #bg-slider { background: linear-gradient(135deg, var(--xmas-red) 0%, var(--xmas-green) 100%) !important; }
+
+        /* 飘落装饰物动画 */
+        .decoration { position: fixed; top: -50px; z-index: 99; pointer-events: none; animation: fall linear infinite; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        /* 爱心飘动动画 */
+        .floating-heart {
+            position: fixed; z-index: 1000; pointer-events: none; color: var(--deep-pink); font-size: 24px;
+            animation: heart-float 1.2s ease-out forwards;
+        }
+        @keyframes heart-float {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) translateX(var(--rx)) rotate(var(--rr)); opacity: 0; }
+        }
+
         #music-player { position: fixed; top: 20px; right: 20px; z-index: 100; background: var(--glass); padding: 12px 20px; border-radius: 30px; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 12px; border: 1px solid white; }
         #music-player button { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
-        .container { height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .card { background: var(--glass); padding: 2rem; border-radius: 35px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); backdrop-filter: blur(15px); border: 2px solid white; text-align: center; width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; position: relative; }
+        
+        .container { height: 100vh; display: flex; justify-content: center; align-items: center; perspective: 1000px; }
+
+        .card { 
+            background: var(--glass); padding: 2rem; border-radius: 35px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05); backdrop-filter: blur(15px); 
+            border: 2px solid white; text-align: center; width: 90%; 
+            max-width: 550px; max-height: 85vh; overflow-y: auto; position: relative; 
+            transform-origin: left center; transition: all 0.5s;
+        }
+
+        /* 页面切换动画 */
+        @keyframes pageIn {
+            0% { opacity: 0; transform: rotateY(-20deg) scale(0.9) translateX(50px); filter: blur(5px); }
+            100% { opacity: 1; transform: rotateY(0deg) scale(1) translateX(0); filter: blur(0); }
+        }
+        .page-animate { animation: pageIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+
+        /* 计时器与心跳 */
+        .timer-box { background: white; padding: 15px; border-radius: 25px; margin-bottom: 20px; border: 1px solid #ffe5ec; }
+        .timer-num { font-size: 1.3rem; font-weight: bold; color: var(--deep-pink); display: inline-block; }
+        .timer-heartbeat { animation: heartbeat 1.5s infinite ease-in-out; }
+        @keyframes heartbeat { 0%, 70% { transform: scale(1); } 14%, 42% { transform: scale(1.05); } }
+
+        /* 按钮与输入框 */
         h1, h2, h3 { color: var(--deep-pink); }
-        .btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; transition: 0.3s; font-size: 0.9rem; margin: 5px; background: white; color: var(--deep-pink); }
+        .btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; transition: 0.3s; font-size: 0.9rem; margin: 5px; background: white; color: var(--deep-pink); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .btn-primary { background: var(--deep-pink); color: white; }
         .btn-blue { background: var(--boy-blue); color: white; }
 
-        .search-box { background: white; padding: 15px; border-radius: 20px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .search-box { background: white; padding: 15px; border-radius: 20px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; }
         .search-input { border: 1px solid #ffe5ec; border-radius: 15px; padding: 8px 12px; outline: none; font-size: 14px; }
         
-        .memo-item { margin: 10px 0; padding: 15px; border-radius: 20px; max-width: 85%; font-size: 14px; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); transition: background 0.5s; }
-        .memo-left { background: var(--light-pink); color: var(--deep-pink); margin-right: auto; text-align: left; border-bottom-left-radius: 2px; }
-        .memo-right { background: var(--boy-blue); color: white; margin-left: auto; text-align: right; border-bottom-right-radius: 2px; }
-        
-        @keyframes highlight-fade {
-            0% { background: #ffdada; transform: scale(1.02); }
-            50% { background: #ffdada; transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-        .highlight { animation: highlight-fade 1s ease 2; border: 2px solid var(--deep-pink); }
+        /* 菜单布局 */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .menu-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; transition: 0.3s; color: var(--deep-pink); font-weight: bold; position: relative; overflow: hidden; }
+        .menu-item:hover { transform: translateY(-3px); }
 
-        .hidden { display: none; }
-        #memo-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding: 10px; scroll-behavior: smooth; }
-        textarea { width: 100%; border-radius: 20px; border: 1px solid #ffe5ec; padding: 15px; box-sizing: border-box; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .menu-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; transition: 0.3s; color: var(--deep-pink); font-weight: bold; }
+        /* 相册与列表 */
         .group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .group-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; position: relative; color: var(--deep-pink); font-weight: bold; }
+        .album-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin: 15px 0; }
+        .album-img-wrapper { position: relative; border-radius: 15px; overflow: hidden; aspect-ratio: 1; }
+        .album-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* 愿望与回忆录列表 */
+        .wish-item { background: white; padding: 15px; border-radius: 20px; margin-bottom: 10px; text-align: left; border-left: 5px solid var(--soft-pink); }
+        .memo-item { margin: 10px 0; padding: 15px; border-radius: 20px; max-width: 85%; font-size: 14px; box-shadow: 2px 2px 10px rgba(0,0,0,0.05); }
+        .memo-left { background: var(--light-pink); color: var(--deep-pink); margin-right: auto; text-align: left; }
+        .memo-right { background: var(--boy-blue); color: white; margin-left: auto; text-align: right; }
+        .highlight { animation: highlight-fade 1s ease 2; border: 2px solid var(--deep-pink); }
+        @keyframes highlight-fade { 0%, 50% { background: #ffdada; } }
+
+        /* 生日剧情文字 */
+        .story-text { font-size: 1.6rem; color: var(--xmas-red); font-weight: bold; line-height: 1.6; margin-bottom: 30px; min-height: 100px; display:flex; align-items:center; justify-content:center; }
+        
+        .hidden { display: none; }
         .bottom-left-btn { position: absolute; bottom: 15px; left: 20px; font-size: 12px; color: var(--deep-pink); cursor: pointer; opacity: 0.8; }
+        #memo-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding: 10px; scroll-behavior: smooth; }
+        textarea { width: 100%; border-radius: 20px; border: 1px solid #ffe5ec; padding: 15px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -67,14 +114,32 @@
             </div>
         </div>
 
+        <div id="birthday-story" class="card hidden">
+            <div id="story-content">
+                <div id="story-text" class="story-text"></div>
+                <div id="wish-input-area" class="hidden" style="margin-bottom:20px;">
+                    <textarea id="wish-box" rows="4" placeholder="在这里写下今年的生日愿望..." style="width:100%; border-radius:15px; padding:15px; border:2px solid #ffe5ec; font-size:1rem; outline:none;"></textarea>
+                </div>
+                <button id="story-btn" class="btn btn-primary" onclick="nextStory()">继续 ✨</button>
+            </div>
+        </div>
+
         <div id="main-page" class="card hidden">
+            <div class="timer-box">
+                <div id="timer-label" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">❤️ 我们已经在一起 ❤️</div>
+                <div id="love-timer" class="timer-num">计算中...</div>
+            </div>
+            
             <h2 id="welcome-msg"></h2>
+            
             <div class="menu-grid">
                 <div class="menu-item" onclick="showGroups()">📷 相册</div>
                 <div class="menu-item" onclick="showSection('memo')">📖 回忆录</div>
                 <div class="menu-item" onclick="showSection('mood')">✍️ 记心情</div>
-                <div class="menu-item" onclick="missYou()">❤️ 想你了</div>
+                <div class="menu-item" onclick="missYou(event)">❤️ 想你了</div>
             </div>
+
+            <div id="wish-menu-container" style="margin-top: 15px;"></div>
         </div>
 
         <div id="content-page" class="card hidden">
@@ -90,6 +155,14 @@
     <script>
         let currentUser = "";
         let allMemos = []; 
+        let currentStoryStep = 0;
+        let currentGroup = "";
+        
+        // 你的起始时间：2026年1月9日 22:51
+        // 注意：如果是2026年，现在显示的天数会是负数。如果你是想从过去算起，请改成2024或2025。
+        // 这里我完全按照你的要求保留2026。
+        const startDate = new Date(2026, 0, 9, 22, 51, 0); 
+        
         const playlist = [
             "https://raw.githubusercontent.com/1716577216leehy/love/main/public/music/M500004RMLd70LGo7K.mp3",
             "https://raw.githubusercontent.com/1716577216leehy/love/main/public/music/xiaojiuwo.mp3",
@@ -105,105 +178,213 @@
             return res.json();
         }
 
+        function triggerTransition(id) {
+            const el = document.getElementById(id);
+            el.classList.remove('page-animate');
+            void el.offsetWidth;
+            el.classList.add('page-animate');
+        }
+
+        // --- 1. 登录逻辑 ---
         function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
-            if (user === '黄泽钰') {
-                if (pwd === 'ilovelhy') {
-                    alert("原来是小狗呀~我亲亲 💋");
-                    enter(user);
+            if (user === '黄泽钰' && pwd === 'ilovelhy') {
+                currentUser = user; 
+                initAudio();
+                const now = new Date();
+                // 11代表12月，24代表24号
+                if (now.getMonth() === 11 && now.getDate() === 24) {
+                    startStory(); // 生日专属入口
                 } else {
-                    alert("小笨蛋~输错啦~");
+                    enterMain(); // 正常入口
                 }
-            } else if (user === '李鸿运') {
-                if (pwd === 'ilovehzy') {
-                    alert("宝宝真棒！猜对密码啦！");
-                    enter(user);
-                } else {
-                    alert("大胆！竟然想篡位！😤");
-                }
-            }
+            } else if (user === '李鸿运' && pwd === 'ilovehzy') {
+                currentUser = user; 
+                initAudio(); 
+                enterMain();
+            } else if (user === '黄泽钰') alert("小笨蛋输错啦");
+            else alert("大胆！竟然想篡位！😤");
         }
 
-        function enter(user) {
-            currentUser = user;
+        // --- 2. 生日剧情系统 (9幕) ---
+        const storySteps = [
+            "你好~ 黄泽钰小朋友~", 
+            "这是一封提前为你准备的信", 
+            "我们在一起已经 {days} 天", 
+            "我们已经一起走过了那~~~~么远", 
+            "今天是个特别的日子", 
+            "要祝我们的小寿星生日快乐~", 
+            "写下你的生日愿望吧~万一会实现呢", 
+            "INPUT_STEP"
+        ];
+
+        function startStory() {
             document.getElementById('login-page').classList.add('hidden');
-            document.getElementById('main-page').classList.remove('hidden');
-            document.getElementById('welcome-msg').innerText = "你好呀, " + user;
-            
-            // 关键：在点击登录确定后，浏览器允许播放，立即启动
-            initAudio();
+            document.getElementById('birthday-story').classList.remove('hidden');
+            document.body.classList.add('birthday-theme'); // 开启红绿主题
+            startSnowEffect(); // 开启飘雪
+            nextStory();
         }
 
-        function initAudio() {
-            // 无论是否初始化过，都重新尝试播放以激活 Context
-            audio.src = playlist[currentMusicIdx];
-            audio.volume = document.getElementById('volume').value;
-            audio.play().then(() => {
-                document.getElementById('play-btn').innerText = "⏸️";
-                audioInitiated = true;
-            }).catch(e => {
-                console.log("播放被拦截，等待下次点击页面");
-            });
-        }
-
-        function toggleMusic() { 
-            if (!audioInitiated) initAudio();
-            if (audio.paused) {
-                audio.play();
-                document.getElementById('play-btn').innerText = "⏸️";
-            } else {
-                audio.pause();
-                document.getElementById('play-btn').innerText = "▶️";
+        function nextStory() {
+            // 剧情结束，进入主页
+            if (currentStoryStep >= storySteps.length) {
+                enterMain();
+                return;
             }
+
+            const textEl = document.getElementById('story-text');
+            const inputArea = document.getElementById('wish-input-area');
+            const btn = document.getElementById('story-btn');
+            let currentText = storySteps[currentStoryStep];
+
+            // 动态替换天数
+            if (currentText.includes("{days}")) {
+                const diff = Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24));
+                currentText = currentText.replace("{days}", diff);
+            }
+
+            // 第8幕：许愿输入
+            if (currentText === "INPUT_STEP") {
+                textEl.innerText = "写下你的生日愿望";
+                inputArea.classList.remove('hidden');
+                btn.innerText = "许愿并进入小窝 🎁";
+                btn.onclick = async () => {
+                    const val = document.getElementById('wish-box').value;
+                    if(val) await api('addWish', { content: val });
+                    enterMain();
+                };
+            } else {
+                // 普通剧情文字
+                textEl.innerText = currentText;
+                currentStoryStep++;
+            }
+            triggerTransition('birthday-story');
         }
 
-        function nextMusic() { 
-            currentMusicIdx = (currentMusicIdx + 1) % playlist.length; 
-            audio.src = playlist[currentMusicIdx]; 
-            audio.play(); 
-            document.getElementById('play-btn').innerText = "⏸️";
+        // --- 3. 进入主页 ---
+        function enterMain() {
+            document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+            document.getElementById('main-page').classList.remove('hidden');
+            document.getElementById('welcome-msg').innerText = "你好呀, " + currentUser;
+            
+            const now = new Date();
+            const isBirthday = (now.getMonth() === 11 && now.getDate() === 24);
+            
+            if (isBirthday) {
+                document.body.classList.add('birthday-theme');
+                document.getElementById('timer-label').innerText = "🎂 生日快乐！ 🎂";
+                // 生日当天，最下方增加愿望按钮
+                document.getElementById('wish-menu-container').innerHTML = `
+                    <div class="menu-item" onclick="showSection('wish')" 
+                         style="background:#fff0f3; margin-top:10px; border:2px solid var(--xmas-red); color:var(--xmas-red);">
+                        🌟 许下的愿望
+                    </div>`;
+                startSnowEffect(); // 确保雪花继续飘
+            } else {
+                document.body.classList.remove('birthday-theme');
+                document.getElementById('wish-menu-container').innerHTML = ""; // 平时清空
+            }
+            
+            startLoveTimer();
+            triggerTransition('main-page');
         }
 
-        function prevMusic() { 
-            currentMusicIdx = (currentMusicIdx - 1 + playlist.length) % playlist.length; 
-            audio.src = playlist[currentMusicIdx]; 
-            audio.play(); 
-            document.getElementById('play-btn').innerText = "⏸️";
+        // --- 4. 计时器逻辑 ---
+        function startLoveTimer() {
+            const timerEl = document.getElementById('love-timer');
+            const now = new Date();
+            if (now.getMonth() === 11 && now.getDate() === 24) {
+                timerEl.innerText = "祝黄泽钰小朋友生日快乐！";
+                timerEl.classList.remove('timer-heartbeat');
+                return;
+            }
+
+            setInterval(() => {
+                const diff = new Date() - startDate;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                timerEl.innerHTML = `${days}天 <span style="font-size:0.9em">${hours}时${minutes}分${seconds}秒</span>`;
+                timerEl.classList.add('timer-heartbeat');
+            }, 1000);
         }
 
-        function setVolume(v) { audio.volume = v; }
+        // --- 5. 冒爱心特效 (修复版) ---
+        async function missYou(event) {
+            // 确保 event 存在
+            let x = window.innerWidth / 2;
+            let y = window.innerHeight / 2;
+            
+            if (event) {
+                x = event.clientX;
+                y = event.clientY;
+            }
 
-        // --- 核心：回忆录搜索与展示 ---
+            // 生成爱心
+            for (let i = 0; i < 6; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.innerText = '❤️';
+                heart.style.left = x + 'px';
+                heart.style.top = y + 'px';
+                
+                const rx = (Math.random() - 0.5) * 150 + 'px';
+                const rr = (Math.random() - 0.5) * 45 + 'deg';
+                heart.style.setProperty('--rx', rx);
+                heart.style.setProperty('--rr', rr);
+                heart.style.animationDuration = (1 + Math.random()) + 's';
+                
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 1500);
+            }
+
+            // 弹窗提示
+            alert("我也想你啦！❤️");
+            
+            // 后台记录
+            await api('missYou');
+        }
+
+        // --- 6. 功能详情页路由 ---
         async function showSection(type) {
             document.getElementById('main-page').classList.add('hidden');
             const page = document.getElementById('content-page');
             const detail = document.getElementById('page-detail');
             page.classList.remove('hidden');
+            triggerTransition('content-page');
             document.getElementById('bottom-controls').innerHTML = '';
 
-            if(type === 'mood') {
-                detail.innerHTML = `<h3>记心情</h3><textarea id="mood-text" rows="5" placeholder="此刻想说什么..."></textarea><br><button class="btn btn-primary" onclick="saveMood()">保存</button>`;
-            } else if(type === 'memo') {
+            if (type === 'wish') {
+                const wishes = await api('getWishes');
+                detail.innerHTML = `<h3>🌟 历年愿望</h3><div id="wish-list"></div>`;
+                wishes.reverse().forEach(w => {
+                    const div = document.createElement('div');
+                    div.className = 'wish-item';
+                    div.innerHTML = `<small style="color:#888">${w.time}</small><br><b style="font-size:1.1rem">${w.content}</b><br><button class="btn" style="padding:4px 10px; font-size:12px; margin-top:5px" onclick="deleteWish(${w.id})">删除</button>`;
+                    document.getElementById('wish-list').appendChild(div);
+                });
+            } else if (type === 'memo') {
                 allMemos = await api('getMemos');
-                renderMemoPage();
+                renderMemoSearch(detail);
+            } else if (type === 'mood') {
+                detail.innerHTML = `<h3>记心情</h3><textarea id="mood-text" rows="5" placeholder="此刻想说什么..." style="width:100%;padding:10px;border-radius:15px;border:1px solid #eee"></textarea><br><button class="btn btn-primary" onclick="saveMood()">保存</button>`;
             }
         }
 
-        function renderMemoPage() {
-            const detail = document.getElementById('page-detail');
-            detail.innerHTML = `
-                <h3>回忆录</h3>
+        // --- 回忆录 ---
+        function renderMemoSearch(container) {
+            container.innerHTML = `<h3>回忆录</h3>
                 <button class="btn btn-blue" style="margin-bottom:10px" onclick="checkMissStats()">🔍 看看TA有没有想我</button>
-                <div class="search-box">
-                    <div style="display:flex; gap:5px;">
-                        <input type="date" id="search-date" class="search-input" style="flex:1">
-                        <input type="text" id="search-text" class="search-input" style="flex:2" placeholder="搜搜关键词...">
-                    </div>
-                    <button class="btn btn-primary" style="margin:0" onclick="handleSearch()">开始搜索</button>
+                <div style="background:white; padding:15px; border-radius:20px; margin-bottom:15px; display:flex; flex-direction:column; gap:8px;">
+                    <input type="date" id="search-date" style="padding:8px; border-radius:10px; border:1px solid #eee;">
+                    <input type="text" id="search-text" placeholder="搜搜关键词..." style="padding:8px; border-radius:10px; border:1px solid #eee;">
+                    <button class="btn btn-primary" onclick="handleSearch()">搜索定位</button>
                 </div>
-                <div id="memo-list"></div>
-            `;
-            renderMemos(allMemos.slice().reverse());
+                <div id="memo-list"></div>`;
+            renderMemos(allMemos);
         }
 
         function renderMemos(data) {
@@ -213,98 +394,90 @@
                 const div = document.createElement('div');
                 div.id = item.memoId || "";
                 div.className = `memo-item ${item.user === '黄泽钰' ? 'memo-left' : 'memo-right'}`;
-                div.innerHTML = `<span style="font-size:10px;opacity:0.6">${item.time}</span><br>${item.content}`;
+                div.innerHTML = `<small style="opacity:0.6">${item.time}</small><br>${item.content}`;
                 list.appendChild(div);
             });
+            setTimeout(() => list.scrollTop = list.scrollHeight, 50);
         }
 
         function handleSearch() {
-            const dateVal = document.getElementById('search-date').value;
-            const textVal = document.getElementById('search-text').value.toLowerCase();
-            const results = allMemos.filter(m => {
-                const matchDate = dateVal ? (m.rawDate === dateVal) : true;
-                const matchText = textVal ? (m.content.toLowerCase().includes(textVal)) : true;
-                return matchDate && matchText;
-            });
-            if (results.length === 0) {
-                alert("哎呀，没找到相关的记录呢...");
-                return;
-            }
-            renderMemos(allMemos.slice().reverse());
+            const d = document.getElementById('search-date').value;
+            const t = document.getElementById('search-text').value.toLowerCase();
+            const results = allMemos.filter(m => (d ? m.rawDate === d : true) && (t ? m.content.toLowerCase().includes(t) : true));
+            if (results.length === 0) return alert("没找到呢...");
+            renderMemos(allMemos);
             const targetId = results[results.length - 1].memoId;
-            setTimeout(() => scrollToMemo(targetId), 100);
+            setTimeout(() => {
+                const el = document.getElementById(targetId);
+                if(el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.border = "2px solid red"; setTimeout(()=>el.style.border="none", 2000); }
+            }, 100);
         }
 
-        function scrollToMemo(id) {
-            const target = document.getElementById(id);
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                target.classList.add('highlight');
-                setTimeout(() => target.classList.remove('highlight'), 3000);
-            }
-        }
-
-        async function missYou() { await api('missYou'); alert("我也想你啦！❤️"); }
-        async function checkMissStats() {
-            const stats = await api('getMissStats');
-            const msg = currentUser === '黄泽钰' ? 
-                `哇塞，李鸿运今天想了你 ${stats.today} 次，本月想了你 ${stats.month} 次，今年想了你 ${stats.year} 次，黄泽钰真是个幸福的小朋友` :
-                `哇塞，黄泽钰今天想了你 ${stats.today} 次，本月想了你 ${stats.month} 次，今年想了你 ${stats.year} 次，黄泽钰真是个乖巧可爱温柔大方善良美丽的小朋友`;
-            alert(msg);
-        }
-        async function saveMood() {
-            const content = document.getElementById('mood-text').value;
-            if(content) { await api('addMemo', { content }); backToMain(); }
-        }
+        // --- 相册 ---
         async function showGroups() {
             document.getElementById('main-page').classList.add('hidden');
             const page = document.getElementById('content-page');
-            const detail = document.getElementById('page-detail');
             page.classList.remove('hidden');
-            detail.innerHTML = `<h3>我们的相册</h3><div class="group-grid" id="group-list"></div>`;
+            triggerTransition('content-page');
             const groups = await api('getGroups');
             const photos = await api('getPhotos');
+            document.getElementById('page-detail').innerHTML = `<h3>我们的相册</h3><div class="group-grid" id="group-list"></div>`;
             const list = document.getElementById('group-list');
             groups.forEach(g => {
-                const count = photos.filter(p => p.group === g).length;
                 const div = document.createElement('div'); div.className = 'group-item';
-                div.innerHTML = `📂 ${g}<br><small>${count} 张</small>`;
+                div.innerHTML = `📂 ${g}<br><small>${photos.filter(p=>p.group===g).length} 张</small>`;
                 div.onclick = () => openGroup(g);
                 list.appendChild(div);
             });
             document.getElementById('bottom-controls').innerHTML = `<div class="bottom-left-btn" onclick="addNewGroup()">＋ 新建分组</div>`;
         }
+
         async function openGroup(g) {
             currentGroup = g;
-            const detail = document.getElementById('page-detail');
-            detail.innerHTML = `<h3>${g}</h3><div class="album-view" id="img-list"></div>
-                <div style="background:white;padding:15px;border-radius:20px;border:1px dashed var(--soft-pink)">
-                    <input type="file" id="img-input" accept="image/*" style="display:none">
-                    <label for="img-input" style="cursor:pointer;color:var(--deep-pink)">✨ 上传到此处 ✨</label><br>
-                    <button class="btn btn-primary" onclick="uploadToGroup()">上传</button>
+            document.getElementById('page-detail').innerHTML = `<h3>${g}</h3><div class="album-view" id="img-list"></div>
+                <div style="background:white; padding:15px; border-radius:20px; border:1px dashed var(--soft-pink)">
+                    <input type="file" id="img-input" accept="image/*" style="display:none"><label for="img-input" style="cursor:pointer; color:var(--deep-pink)">✨ 点击上传 ✨</label><br>
+                    <button class="btn btn-primary" onclick="uploadToGroup()">开始上传</button>
                 </div>`;
-            refreshGroupPhotos();
-            document.getElementById('bottom-controls').innerHTML = `<div class="bottom-left-btn" onclick="showGroups()">⬅ 返回</div>`;
+            refreshPhotos(g);
+            document.getElementById('bottom-controls').innerHTML = `<div class="bottom-left-btn" onclick="showGroups()">⬅ 返回分组</div>`;
         }
-        async function refreshGroupPhotos() {
+
+        async function refreshPhotos(g) {
             const photos = await api('getPhotos');
             const list = document.getElementById('img-list'); list.innerHTML = '';
-            photos.filter(p => p.group === currentGroup).reverse().forEach(p => {
-                const wrapper = document.createElement('div'); wrapper.className = 'album-img-wrapper';
-                wrapper.innerHTML = `<img src="${p.data}"><div style="position:absolute;top:5px;right:5px"><button class="btn" style="padding:5px;opacity:0.8" onclick="deletePhoto(${p.id})">×</button></div>`;
-                list.appendChild(wrapper);
+            photos.filter(p => p.group === g).reverse().forEach(p => {
+                const div = document.createElement('div'); div.className = 'album-img-wrapper';
+                div.innerHTML = `<img src="${p.data}"><div style="position:absolute;top:5px;right:5px"><button class="btn" style="padding:5px;opacity:0.8" onclick="deletePhoto(${p.id})">×</button></div>`;
+                list.appendChild(div);
             });
         }
+
         async function uploadToGroup() {
-            const file = document.getElementById('img-input').files[0];
-            if(!file) return;
+            const file = document.getElementById('img-input').files[0]; if(!file) return;
             const reader = new FileReader();
-            reader.onloadend = async () => { await api('addPhoto', { image: reader.result, groupName: currentGroup }); refreshGroupPhotos(); };
+            reader.onloadend = async () => { await api('addPhoto', { image: reader.result, groupName: currentGroup }); refreshPhotos(currentGroup); };
             reader.readAsDataURL(file);
         }
-        async function addNewGroup() { const name = prompt("请输入新分组名称:"); if(name) { await api('addGroup', {groupName: name}); showGroups(); } }
-        async function deletePhoto(id) { if(confirm('删除这张回忆？')) { await api('delPhoto', {id}); refreshGroupPhotos(); } }
-        function backToMain() { document.getElementById('content-page').classList.add('hidden'); document.getElementById('main-page').classList.remove('hidden'); }
+
+        // --- 通用工具 ---
+        async function addNewGroup() { const n = prompt("分组名称:"); if(n) { await api('addGroup', { groupName: n }); showGroups(); } }
+        async function deletePhoto(id) { if(confirm('删除照片？')) { await api('delPhoto', { id }); refreshPhotos(currentGroup); } }
+        async function saveMood() { const content = document.getElementById('mood-text').value; if(content) { await api('addMemo', { content }); backToMain(); } }
+        async function deleteWish(id) { if(confirm('删除愿望？')) { await api('delWish', { id }); showSection('wish'); } }
+        async function checkMissStats() {
+            const stats = await api('getMissStats');
+            const msg = currentUser === '黄泽钰' ? `李鸿运今天想了你 ${stats.today} 次` : `黄泽钰今天想了你 ${stats.today} 次`;
+            alert(msg);
+        }
+        function backToMain() { enterMain(); }
+        
+        function startSnowEffect() { setInterval(() => { const d = document.createElement('div'); d.className = 'decoration'; d.innerText = ['❄️', '🍰', '🎁', '🎄'][Math.floor(Math.random()*4)]; d.style.left = Math.random()*100 + 'vw'; d.style.animationDuration = Math.random()*3+4+'s'; document.body.appendChild(d); setTimeout(() => d.remove(), 7000); }, 500); }
+        function initAudio() { if(!audioInitiated) { audio.src = playlist[currentMusicIdx]; audio.play().catch(()=>{}); audioInitiated = true; } }
+        function toggleMusic() { if(!audioInitiated) initAudio(); audio.paused ? audio.play() : audio.pause(); document.getElementById('play-btn').innerText = audio.paused ? "▶️" : "⏸️"; }
+        function nextMusic() { currentMusicIdx = (currentMusicIdx+1)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
+        function prevMusic() { currentMusicIdx = (currentMusicIdx-1+playlist.length)%playlist.length; audio.src = playlist[currentMusicIdx]; audio.play(); }
+        function setVolume(v) { audio.volume = v; }
     </script>
 </body>
 </html>
