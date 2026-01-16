@@ -2,7 +2,6 @@ export async function onRequestPost(context) {
     const { action, user, content, image, id, groupName } = await context.request.json();
     const KV = context.env.LOVE_DATA;
 
-    // --- 1. 思念计数逻辑 ---
     if (action === 'missYou') {
         const missLogs = JSON.parse(await KV.get("miss_logs") || "[]");
         missLogs.push({ from: user, time: Date.now() });
@@ -27,7 +26,6 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify(stats));
     }
 
-    // --- 2. 相册分组逻辑 ---
     if (action === 'getGroups') {
         const groups = JSON.parse(await KV.get("album_groups") || '["默认分组"]');
         return new Response(JSON.stringify(groups));
@@ -47,7 +45,6 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify({ status: "ok" }));
     }
 
-    // --- 3. 心情记录逻辑 (支持搜索与定位) ---
     if (action === 'addMemo') {
         const memos = JSON.parse(await KV.get("memos") || "[]");
         const now = new Date();
@@ -67,7 +64,6 @@ export async function onRequestPost(context) {
         return new Response(memos);
     }
 
-    // --- 4. 照片管理逻辑 ---
     if (action === 'addPhoto') {
         const photos = JSON.parse(await KV.get("photos") || "[]");
         photos.push({ 
