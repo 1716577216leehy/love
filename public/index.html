@@ -184,8 +184,8 @@
                 alert("原来是小狗呀~我亲亲 💋");
                 currentUser = user; initAudio();
                 const now = new Date();
-                // 测试日期: 1月16日
-                if (now.getMonth() === 0 && now.getDate() === 16) startStory();
+                // 11 代表 12 月, 24 代表 24 日
+                if (now.getMonth() === 11 && now.getDate() === 24) startStory();
                 else enterMain();
             } else if (user === '李鸿运' && pwd === 'ilovehzy') {
                 alert("宝宝真棒！猜对密码啦！");
@@ -231,8 +231,8 @@
             document.getElementById('main-page').classList.remove('hidden');
             document.getElementById('welcome-msg').innerText = "你好呀, " + currentUser;
             const now = new Date();
-            // 测试日期: 1月16日
-            const isBirthday = (now.getMonth() === 0 && now.getDate() === 16);
+            // 11 代表 12 月, 24 代表 24 日
+            const isBirthday = (now.getMonth() === 11 && now.getDate() === 24);
             if (isBirthday) {
                 document.body.classList.add('birthday-theme');
                 document.getElementById('timer-label').innerText = "🎂 生日快乐！ 🎂";
@@ -249,8 +249,8 @@
         function startLoveTimer() {
             const timerEl = document.getElementById('love-timer');
             const now = new Date();
-            // 测试日期: 1月16日
-            if (now.getMonth() === 0 && now.getDate() === 16) {
+            // 11 代表 12 月, 24 代表 24 日
+            if (now.getMonth() === 11 && now.getDate() === 24) {
                 timerEl.innerText = currentUser === '李鸿运' ? "今天是她的生日哦" : "祝黄泽钰小朋友生日快乐！";
                 timerEl.classList.remove('timer-heartbeat'); return;
             }
@@ -341,11 +341,12 @@
             const groups = await api('getGroups');
             const photos = await api('getPhotos');
             document.getElementById('page-detail').innerHTML = `<h3>我们的相册</h3><div class="group-grid" id="group-list"></div>`;
+            const list = document.getElementById('group-list');
             groups.forEach(g => {
                 const div = document.createElement('div'); div.className = 'group-item';
                 div.innerHTML = `📂 ${g}<br><small>${photos.filter(p=>p.group===g).length} 张</small>`;
                 div.onclick = () => openGroup(g);
-                document.getElementById('group-list').appendChild(div);
+                list.appendChild(div);
             });
             document.getElementById('bottom-controls').innerHTML = `<button class="btn" onclick="addNewGroup()">＋ 新建分组</button>`;
         }
