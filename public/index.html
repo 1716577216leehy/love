@@ -21,13 +21,21 @@
         
         .container { height: 100vh; display: flex; justify-content: center; align-items: center; perspective: 1000px; }
 
-        /* 核心动画：丝滑翻页效果 */
+        /* 页面切换动画 */
         @keyframes pageIn {
             0% { opacity: 0; transform: rotateY(-20deg) scale(0.9) translateX(50px); filter: blur(5px); }
             100% { opacity: 1; transform: rotateY(0deg) scale(1) translateX(0); filter: blur(0); }
         }
-
         .page-animate { animation: pageIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+
+        /* 心跳脉冲动画 */
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            14% { transform: scale(1.05); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.05); }
+            70% { transform: scale(1); }
+        }
 
         .card { 
             background: var(--glass); padding: 2rem; border-radius: 35px; 
@@ -36,6 +44,14 @@
             max-width: 550px; max-height: 85vh; overflow-y: auto; position: relative; 
             transform-origin: left center;
         }
+
+        /* 计时器盒样式 */
+        .timer-box { background: white; padding: 15px; border-radius: 25px; margin-bottom: 20px; border: 1px solid #ffe5ec; box-shadow: 0 5px 15px rgba(251, 111, 146, 0.1); }
+        .timer-num { 
+            font-size: 1.3rem; font-weight: bold; color: var(--deep-pink); 
+            display: inline-block; animation: heartbeat 1.5s infinite ease-in-out; 
+        }
+        .timer-label { font-size: 0.85rem; color: #888; margin-bottom: 5px; }
 
         h1, h2, h3 { color: var(--deep-pink); }
         .btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; transition: 0.3s; font-size: 0.9rem; margin: 5px; background: white; color: var(--deep-pink); }
@@ -59,7 +75,7 @@
         .hidden { display: none; }
         #memo-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding: 10px; scroll-behavior: smooth; }
         textarea { width: 100%; border-radius: 20px; border: 1px solid #ffe5ec; padding: 15px; box-sizing: border-box; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
         .menu-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; transition: 0.3s; color: var(--deep-pink); font-weight: bold; }
         .group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .group-item { background: white; padding: 25px 10px; border-radius: 20px; cursor: pointer; border: 1px solid #ffe5ec; position: relative; color: var(--deep-pink); font-weight: bold; }
@@ -85,7 +101,11 @@
         </div>
 
         <div id="main-page" class="card hidden">
-            <h2 id="welcome-msg"></h2>
+            <div class="timer-box">
+                <div class="timer-label">❤️ 我们已经在一起 ❤️</div>
+                <div id="love-timer" class="timer-num">加载中...</div>
+            </div>
+            <h2 id="welcome-msg" style="margin-top:0;"></h2>
             <div class="menu-grid">
                 <div class="menu-item" onclick="showGroups()">📷 相册</div>
                 <div class="menu-item" onclick="showSection('memo')">📖 回忆录</div>
@@ -107,6 +127,7 @@
     <script>
         let currentUser = "";
         let allMemos = []; 
+        let timerInterval = null;
         const playlist = [
             "https://raw.githubusercontent.com/1716577216leehy/love/main/public/music/M500004RMLd70LGo7K.mp3",
             "https://raw.githubusercontent.com/1716577216leehy/love/main/public/music/xiaojiuwo.mp3",
@@ -117,36 +138,54 @@
         const audio = document.getElementById('audio-element');
         audio.addEventListener('ended', nextMusic);
 
+        // 精确计时逻辑
+        function startLoveTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            // 设定起始时间：2026年1月9日 22:51:00
+            const startDate = new Date(2026, 0, 9, 22, 51, 0); 
+            
+            timerInterval = setInterval(() => {
+                const now = new Date();
+                const diff = now - startDate;
+
+                if (diff < 0) {
+                    document.getElementById('love-timer').innerText = "期待那一刻...";
+                    return;
+                }
+
+                const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+                const days = Math.floor((diff % (1000 * 60 * 60 * 24 * 365)) / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                let timeStr = "";
+                if (years > 0) timeStr += years + "年 ";
+                timeStr += days + "天 " + hours + "时 " + minutes + "分 " + seconds + "秒";
+                
+                document.getElementById('love-timer').innerText = timeStr;
+            }, 1000);
+        }
+
         async function api(action, data = {}) {
             const res = await fetch('/api/data', { method: 'POST', body: JSON.stringify({ action, user: currentUser, ...data }) });
             return res.json();
         }
 
-        // 工具函数：触发页面切换动画
         function triggerTransition(elementId) {
             const el = document.getElementById(elementId);
             el.classList.remove('page-animate');
-            void el.offsetWidth; // 触发回流
+            void el.offsetWidth;
             el.classList.add('page-animate');
         }
 
         function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
-            if (user === '黄泽钰') {
-                if (pwd === 'ilovelhy') {
-                    alert("原来是小狗呀~我亲亲 💋");
-                    enter(user);
-                } else {
-                    alert("小笨蛋~输错啦~");
-                }
-            } else if (user === '李鸿运') {
-                if (pwd === 'ilovehzy') {
-                    alert("宝宝真棒！猜对密码啦！");
-                    enter(user);
-                } else {
-                    alert("大胆！竟然想篡位！😤");
-                }
-            }
+            if (user === '黄泽钰' && pwd === 'ilovelhy') { alert("原来是小狗呀~我亲亲 💋"); enter(user); }
+            else if (user === '李鸿运' && pwd === 'ilovehzy') { alert("宝宝真棒！猜对密码啦！"); enter(user); }
+            else if (user === '黄泽钰') { alert("小笨蛋~输错啦~"); }
+            else { alert("大胆！竟然想篡位！😤"); }
         }
 
         function enter(user) {
@@ -154,8 +193,9 @@
             document.getElementById('login-page').classList.add('hidden');
             const mainPage = document.getElementById('main-page');
             mainPage.classList.remove('hidden');
-            triggerTransition('main-page'); // 翻页动画
+            triggerTransition('main-page');
             document.getElementById('welcome-msg').innerText = "你好呀, " + user;
+            startLoveTimer(); // 启动心跳计时
             initAudio();
         }
 
@@ -200,7 +240,7 @@
             const page = document.getElementById('content-page');
             const detail = document.getElementById('page-detail');
             page.classList.remove('hidden');
-            triggerTransition('content-page'); // 翻页动画
+            triggerTransition('content-page');
             document.getElementById('bottom-controls').innerHTML = '';
 
             if(type === 'mood') {
@@ -238,7 +278,7 @@
                 div.innerHTML = `<span style="font-size:10px;opacity:0.6">${item.time}</span><br>${item.content}`;
                 list.appendChild(div);
             });
-            setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50); 
+            setTimeout(() => { if(list) list.scrollTop = list.scrollHeight; }, 50); 
         }
 
         function handleSearch() {
@@ -284,7 +324,7 @@
             const page = document.getElementById('content-page');
             const detail = document.getElementById('page-detail');
             page.classList.remove('hidden');
-            triggerTransition('content-page'); // 翻页动画
+            triggerTransition('content-page');
             detail.innerHTML = `<h3>我们的相册</h3><div class="group-grid" id="group-list"></div>`;
             const groups = await api('getGroups');
             const photos = await api('getPhotos');
@@ -332,7 +372,7 @@
             document.getElementById('content-page').classList.add('hidden'); 
             const mainPage = document.getElementById('main-page');
             mainPage.classList.remove('hidden'); 
-            triggerTransition('main-page'); // 翻页动画
+            triggerTransition('main-page');
         }
     </script>
 </body>
