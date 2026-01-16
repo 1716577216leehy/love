@@ -190,29 +190,21 @@
             el.classList.add('page-animate');
         }
 
-        // --- 核心修复：找回弹窗逻辑 ---
         function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
             if (user === '黄泽钰') {
                 if (pwd === 'ilovelhy') {
-                    alert("原来是小狗呀~我亲亲 💋"); // 找回提示
-                    currentUser = user; 
-                    initAudio();
+                    alert("原来是小狗呀~我亲亲 💋");
+                    currentUser = user; initAudio();
                     const now = new Date();
                     if (now.getMonth() === 11 && now.getDate() === 24) startStory();
                     else enterMain();
-                } else {
-                    alert("小笨蛋输错啦");
-                }
+                } else { alert("小笨蛋输错啦"); }
             } else if (user === '李鸿运') {
                 if (pwd === 'ilovehzy') {
                     alert("宝宝真棒！猜对密码啦！");
-                    currentUser = user; 
-                    initAudio(); 
-                    enterMain();
-                } else {
-                    alert("不对哦~");
-                }
+                    currentUser = user; initAudio(); enterMain();
+                } else { alert("不对哦~"); }
             }
         }
 
@@ -258,7 +250,10 @@
             if (isBirthday) {
                 document.body.classList.add('birthday-theme');
                 document.getElementById('timer-label').innerText = "🎂 生日快乐！ 🎂";
-                document.getElementById('wish-menu-container').innerHTML = `<div class="menu-item" onclick="showSection('wish')" style="background:#fff0f3; margin-top:5px; border:2px solid var(--xmas-red); color:var(--xmas-red); font-size: 0.9rem;">🌟 许下的愿望</div>`;
+                // 只有黄泽钰能看到愿望入口
+                if(currentUser === '黄泽钰') {
+                    document.getElementById('wish-menu-container').innerHTML = `<div class="menu-item" onclick="showSection('wish')" style="background:#fff0f3; margin-top:5px; border:2px solid var(--xmas-red); color:var(--xmas-red); font-size: 0.9rem;">🌟 许下的愿望</div>`;
+                }
                 startSnowEffect();
             } else {
                 document.body.classList.remove('birthday-theme');
@@ -268,12 +263,22 @@
             triggerTransition('main-page');
         }
 
+        // --- 核心修改：针对李鸿运的计时器逻辑 ---
         function startLoveTimer() {
             const timerEl = document.getElementById('love-timer');
             const now = new Date();
-            if (now.getMonth() === 11 && now.getDate() === 24) {
-                timerEl.innerText = "祝黄泽钰小朋友生日快乐！"; timerEl.classList.remove('timer-heartbeat'); return;
+            const isBirthday = (now.getMonth() === 11 && now.getDate() === 24);
+
+            if (isBirthday) {
+                if (currentUser === '李鸿运') {
+                    timerEl.innerText = "今天是她的生日哦"; // 李鸿运提示
+                } else {
+                    timerEl.innerText = "祝黄泽钰小朋友生日快乐！"; // 黄泽钰提示
+                }
+                timerEl.classList.remove('timer-heartbeat');
+                return;
             }
+
             setInterval(() => {
                 const diff = new Date() - startDate;
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -331,7 +336,7 @@
                         <input type="date" id="search-date" class="search-input" style="flex:1">
                         <input type="text" id="search-text" class="search-input" style="flex:1.5" placeholder="搜索...">
                     </div>
-                    <button class="btn btn-primary" style="margin:0; padding:8px;" onclick="handleSearch()">搜索定位</button>
+                    <button class="btn btn-primary" style="margin:0; padding:8px;" onclick="handleSearch()">开始搜索</button>
                 </div>
                 <div id="memo-list"></div>
             `;
