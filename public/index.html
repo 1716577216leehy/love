@@ -129,21 +129,16 @@
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('main-page').classList.remove('hidden');
             document.getElementById('welcome-msg').innerText = "你好呀, " + user;
-            
-            // 关键：在点击登录确定后，浏览器允许播放，立即启动
             initAudio();
         }
 
         function initAudio() {
-            // 无论是否初始化过，都重新尝试播放以激活 Context
             audio.src = playlist[currentMusicIdx];
             audio.volume = document.getElementById('volume').value;
             audio.play().then(() => {
                 document.getElementById('play-btn').innerText = "⏸️";
                 audioInitiated = true;
-            }).catch(e => {
-                console.log("播放被拦截，等待下次点击页面");
-            });
+            }).catch(e => console.log("Waiting for interaction"));
         }
 
         function toggleMusic() { 
@@ -173,7 +168,6 @@
 
         function setVolume(v) { audio.volume = v; }
 
-        // --- 核心：回忆录搜索与展示 ---
         async function showSection(type) {
             document.getElementById('main-page').classList.add('hidden');
             const page = document.getElementById('content-page');
@@ -203,7 +197,7 @@
                 </div>
                 <div id="memo-list"></div>
             `;
-            renderMemos(allMemos.slice().reverse());
+            renderMemos(allMemos); 
         }
 
         function renderMemos(data) {
@@ -216,6 +210,11 @@
                 div.innerHTML = `<span style="font-size:10px;opacity:0.6">${item.time}</span><br>${item.content}`;
                 list.appendChild(div);
             });
+            
+            // 渲染完成后，强制滚动到列表最底部
+            setTimeout(() => {
+                list.scrollTop = list.scrollHeight;
+            }, 50); 
         }
 
         function handleSearch() {
@@ -230,7 +229,7 @@
                 alert("哎呀，没找到相关的记录呢...");
                 return;
             }
-            renderMemos(allMemos.slice().reverse());
+            renderMemos(allMemos);
             const targetId = results[results.length - 1].memoId;
             setTimeout(() => scrollToMemo(targetId), 100);
         }
@@ -308,3 +307,4 @@
     </script>
 </body>
 </html>
+      
