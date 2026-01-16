@@ -46,45 +46,23 @@
 
         #page-detail { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
 
-        /* 滚动条样式 */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(251, 111, 146, 0.3); border-radius: 10px; }
 
-        /* 核心修改：菜单网格与居中逻辑 */
         .menu-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            margin-top: 15px; 
-            overflow-y: auto; 
-            padding: 5px; 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; overflow-y: auto; padding: 5px; 
         }
 
         .menu-item { 
-            background: white; 
-            padding: 15px 5px; /* 减小上下内边距，使方框变小 */
-            border-radius: 20px; 
-            cursor: pointer; 
-            border: 1px solid #ffe5ec; 
-            transition: 0.3s; 
-            color: var(--deep-pink); 
-            font-weight: bold; 
-            position: relative; 
-            overflow: hidden;
-
-            /* 强制居中核心代码 */
-            display: flex;
-            align-items: center; /* 垂直居中 */
-            justify-content: center; /* 水平居中 */
-            text-align: center;
-            font-size: 0.95rem;
-            min-height: 60px; /* 设置最小高度确保统一 */
+            background: white; padding: 15px 5px; border-radius: 20px; cursor: pointer; 
+            border: 1px solid #ffe5ec; transition: 0.3s; color: var(--deep-pink); font-weight: bold; 
+            position: relative; overflow: hidden; display: flex; align-items: center; 
+            justify-content: center; text-align: center; font-size: 0.95rem; min-height: 60px; 
         }
         
         .menu-item:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(251, 111, 146, 0.1); }
 
-        /* 回忆录与消息 */
         #memo-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 5px 10px; scroll-behavior: smooth; }
         .memo-item { padding: 10px 14px; margin: 4px 0; border-radius: 18px; font-size: 13px; box-shadow: 1px 1px 5px rgba(0,0,0,0.03); line-height: 1.5; }
         .memo-left { background: var(--light-pink); color: var(--deep-pink); margin-right: auto; text-align: left; border-bottom-left-radius: 4px; max-width: 85%; }
@@ -212,17 +190,30 @@
             el.classList.add('page-animate');
         }
 
+        // --- 核心修复：找回弹窗逻辑 ---
         function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
-            if (user === '黄泽钰' && pwd === 'ilovelhy') {
-                currentUser = user; initAudio();
-                const now = new Date();
-                if (now.getMonth() === 11 && now.getDate() === 24) startStory();
-                else enterMain();
-            } else if (user === '李鸿运' && pwd === 'ilovehzy') {
-                currentUser = user; initAudio(); enterMain();
-            } else if (user === '黄泽钰') alert("小笨蛋输错啦");
-            else alert("不对哦~");
+            if (user === '黄泽钰') {
+                if (pwd === 'ilovelhy') {
+                    alert("原来是小狗呀~我亲亲 💋"); // 找回提示
+                    currentUser = user; 
+                    initAudio();
+                    const now = new Date();
+                    if (now.getMonth() === 11 && now.getDate() === 24) startStory();
+                    else enterMain();
+                } else {
+                    alert("小笨蛋输错啦");
+                }
+            } else if (user === '李鸿运') {
+                if (pwd === 'ilovehzy') {
+                    alert("宝宝真棒！猜对密码啦！");
+                    currentUser = user; 
+                    initAudio(); 
+                    enterMain();
+                } else {
+                    alert("不对哦~");
+                }
+            }
         }
 
         const storySteps = [
@@ -340,7 +331,7 @@
                         <input type="date" id="search-date" class="search-input" style="flex:1">
                         <input type="text" id="search-text" class="search-input" style="flex:1.5" placeholder="搜索...">
                     </div>
-                    <button class="btn btn-primary" style="margin:0; padding:8px;" onclick="handleSearch()">开始搜索</button>
+                    <button class="btn btn-primary" style="margin:0; padding:8px;" onclick="handleSearch()">搜索定位</button>
                 </div>
                 <div id="memo-list"></div>
             `;
@@ -392,7 +383,7 @@
         async function openGroup(g) {
             currentGroup = g;
             document.getElementById('page-detail').innerHTML = `<h3>${g}</h3><div class="album-view" id="img-list"></div>
-                <div style="background:white; padding:10px; border-radius:15px; border:1px dashed var(--soft-pink); flex-shrink:0;">
+                <div style="background:white; padding:10px; border-radius:20px; border:1px dashed var(--soft-pink); flex-shrink:0;">
                     <input type="file" id="img-input" accept="image/*" style="display:none"><label for="img-input" style="cursor:pointer; color:var(--deep-pink)">✨ 点击上传 ✨</label><br>
                     <button class="btn btn-primary" style="margin-top:5px; padding:6px 15px;" onclick="uploadToGroup()">上传</button>
                 </div>`;
