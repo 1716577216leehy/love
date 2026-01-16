@@ -180,17 +180,20 @@
 
         function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
-            if (user === '黄泽钰' && pwd === 'ilovelhy') {
-                alert("原来是小狗呀~我亲亲~");
-                currentUser = user; initAudio();
-                const now = new Date();
-                // 11 代表 12 月, 24 代表 24 日
-                if (now.getMonth() === 11 && now.getDate() === 24) startStory();
-                else enterMain();
-            } else if (user === '李鸿运' && pwd === 'ilovehzy') {
-                alert("蒸蚌！猜对密码啦宝宝！");
-                currentUser = user; initAudio(); enterMain();
-            } else { alert("大胆！竟然想篡位！"); }
+            if (user === '黄泽钰') {
+                if (pwd === 'ilovelhy') {
+                    alert("原来是小狗呀~我亲亲 💋"); // 修改为指定提示词
+                    currentUser = user; initAudio();
+                    const now = new Date();
+                    if (now.getMonth() === 11 && now.getDate() === 24) startStory(); // 12.24
+                    else enterMain();
+                } else { alert("小笨蛋~再试一下"); } // 修改为指定提示词
+            } else if (user === '李鸿运') {
+                if (pwd === 'ilovehzy') {
+                    alert("蒸蚌！猜对密码啦宝宝！"); // 修改为指定提示词
+                    currentUser = user; initAudio(); enterMain();
+                } else { alert("大胆！竟然想篡位"); } // 修改为指定提示词
+            }
         }
 
         const storySteps = [
@@ -231,7 +234,6 @@
             document.getElementById('main-page').classList.remove('hidden');
             document.getElementById('welcome-msg').innerText = "你好呀, " + currentUser;
             const now = new Date();
-            // 11 代表 12 月, 24 代表 24 日
             const isBirthday = (now.getMonth() === 11 && now.getDate() === 24);
             if (isBirthday) {
                 document.body.classList.add('birthday-theme');
@@ -249,7 +251,6 @@
         function startLoveTimer() {
             const timerEl = document.getElementById('love-timer');
             const now = new Date();
-            // 11 代表 12 月, 24 代表 24 日
             if (now.getMonth() === 11 && now.getDate() === 24) {
                 timerEl.innerText = currentUser === '李鸿运' ? "今天是她的生日哦" : "祝黄泽钰小朋友生日快乐！";
                 timerEl.classList.remove('timer-heartbeat'); return;
@@ -400,4 +401,3 @@
     </script>
 </body>
 </html>
-
