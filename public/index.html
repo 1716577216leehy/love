@@ -38,7 +38,7 @@
         .container { height: 100vh; display: flex; justify-content: center; align-items: center; perspective: 1000px; }
 
         .card { 
-            background: var(--glass); padding: 2rem; border-radius: 35px; 
+            background: var(--glass); padding: 2.5rem; border-radius: 35px; 
             box-shadow: 0 15px 40px rgba(0,0,0,0.05); backdrop-filter: blur(15px); 
             border: 2px solid white; text-align: center; width: 90%; 
             max-width: 550px; max-height: 85vh; overflow-y: auto; position: relative; 
@@ -159,8 +159,6 @@
         let currentGroup = "";
         
         // 你的起始时间：2026年1月9日 22:51
-        // 注意：如果是2026年，现在显示的天数会是负数。如果你是想从过去算起，请改成2024或2025。
-        // 这里我完全按照你的要求保留2026。
         const startDate = new Date(2026, 0, 9, 22, 51, 0); 
         
         const playlist = [
@@ -185,18 +183,18 @@
             el.classList.add('page-animate');
         }
 
-        // --- 1. 登录逻辑 ---
+        // --- 1. 登录逻辑 (日期测试模式: 1月16日) ---
         function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
             if (user === '黄泽钰' && pwd === 'ilovelhy') {
                 currentUser = user; 
                 initAudio();
                 const now = new Date();
-                // 11代表12月，24代表24号
-                if (now.getMonth() === 1 && now.getDate() === 16) {
-                    startStory(); // 生日专属入口
+                // TEST MODE: 检查是否为 1月16日 (月份从0开始，0=1月)
+                if (now.getMonth() === 0 && now.getDate() === 16) {
+                    startStory(); // 进入生日剧情
                 } else {
-                    enterMain(); // 正常入口
+                    enterMain(); // 进入正常主页
                 }
             } else if (user === '李鸿运' && pwd === 'ilovehzy') {
                 currentUser = user; 
@@ -269,7 +267,8 @@
             document.getElementById('welcome-msg').innerText = "你好呀, " + currentUser;
             
             const now = new Date();
-            const isBirthday = (now.getMonth() === 1 && now.getDate() === 16);
+            // TEST MODE: 检查是否为 1月16日
+            const isBirthday = (now.getMonth() === 0 && now.getDate() === 16);
             
             if (isBirthday) {
                 document.body.classList.add('birthday-theme');
@@ -294,7 +293,8 @@
         function startLoveTimer() {
             const timerEl = document.getElementById('love-timer');
             const now = new Date();
-            if (now.getMonth() === 1 && now.getDate() === 16) {
+            // TEST MODE: 检查是否为 1月16日
+            if (now.getMonth() === 0 && now.getDate() === 16) {
                 timerEl.innerText = "祝黄泽钰小朋友生日快乐！";
                 timerEl.classList.remove('timer-heartbeat');
                 return;
@@ -312,7 +312,7 @@
             }, 1000);
         }
 
-        // --- 5. 冒爱心特效 (修复版) ---
+        // --- 5. 冒爱心特效 ---
         async function missYou(event) {
             // 确保 event 存在
             let x = window.innerWidth / 2;
@@ -374,7 +374,6 @@
             }
         }
 
-        // --- 回忆录 ---
         function renderMemoSearch(container) {
             container.innerHTML = `<h3>回忆录</h3>
                 <button class="btn btn-blue" style="margin-bottom:10px" onclick="checkMissStats()">🔍 看看TA有没有想我</button>
@@ -429,7 +428,7 @@
                 div.onclick = () => openGroup(g);
                 list.appendChild(div);
             });
-            document.getElementById('bottom-controls').innerHTML = `<div class="bottom-left-btn" onclick="addNewGroup()">＋ 新建分组</div>`;
+            document.getElementById('bottom-controls').innerHTML = `<button class="btn" onclick="addNewGroup()">＋ 新建分组</button>`;
         }
 
         async function openGroup(g) {
@@ -481,6 +480,3 @@
     </script>
 </body>
 </html>
-
-
-
