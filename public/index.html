@@ -18,8 +18,25 @@
         #bg-slider { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(135deg, #ffe5ec 0%, #ffc2d1 100%); }
         #music-player { position: fixed; top: 20px; right: 20px; z-index: 100; background: var(--glass); padding: 12px 20px; border-radius: 30px; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 12px; border: 1px solid white; }
         #music-player button { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
-        .container { height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .card { background: var(--glass); padding: 2rem; border-radius: 35px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); backdrop-filter: blur(15px); border: 2px solid white; text-align: center; width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; position: relative; }
+        
+        .container { height: 100vh; display: flex; justify-content: center; align-items: center; perspective: 1000px; }
+
+        /* 核心动画：丝滑翻页效果 */
+        @keyframes pageIn {
+            0% { opacity: 0; transform: rotateY(-20deg) scale(0.9) translateX(50px); filter: blur(5px); }
+            100% { opacity: 1; transform: rotateY(0deg) scale(1) translateX(0); filter: blur(0); }
+        }
+
+        .page-animate { animation: pageIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+
+        .card { 
+            background: var(--glass); padding: 2rem; border-radius: 35px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05); backdrop-filter: blur(15px); 
+            border: 2px solid white; text-align: center; width: 90%; 
+            max-width: 550px; max-height: 85vh; overflow-y: auto; position: relative; 
+            transform-origin: left center;
+        }
+
         h1, h2, h3 { color: var(--deep-pink); }
         .btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; transition: 0.3s; font-size: 0.9rem; margin: 5px; background: white; color: var(--deep-pink); }
         .btn-primary { background: var(--deep-pink); color: white; }
@@ -105,6 +122,14 @@
             return res.json();
         }
 
+        // 工具函数：触发页面切换动画
+        function triggerTransition(elementId) {
+            const el = document.getElementById(elementId);
+            el.classList.remove('page-animate');
+            void el.offsetWidth; // 触发回流
+            el.classList.add('page-animate');
+        }
+
         function login(user) {
             const pwd = prompt(`请输入密码 (${user}):`);
             if (user === '黄泽钰') {
@@ -127,7 +152,9 @@
         function enter(user) {
             currentUser = user;
             document.getElementById('login-page').classList.add('hidden');
-            document.getElementById('main-page').classList.remove('hidden');
+            const mainPage = document.getElementById('main-page');
+            mainPage.classList.remove('hidden');
+            triggerTransition('main-page'); // 翻页动画
             document.getElementById('welcome-msg').innerText = "你好呀, " + user;
             initAudio();
         }
@@ -173,6 +200,7 @@
             const page = document.getElementById('content-page');
             const detail = document.getElementById('page-detail');
             page.classList.remove('hidden');
+            triggerTransition('content-page'); // 翻页动画
             document.getElementById('bottom-controls').innerHTML = '';
 
             if(type === 'mood') {
@@ -210,11 +238,7 @@
                 div.innerHTML = `<span style="font-size:10px;opacity:0.6">${item.time}</span><br>${item.content}`;
                 list.appendChild(div);
             });
-            
-            // 渲染完成后，强制滚动到列表最底部
-            setTimeout(() => {
-                list.scrollTop = list.scrollHeight;
-            }, 50); 
+            setTimeout(() => { list.scrollTop = list.scrollHeight; }, 50); 
         }
 
         function handleSearch() {
@@ -243,7 +267,7 @@
             }
         }
 
-        async function missYou() { await api('missYou'); alert("我也想你啦！❤️"); }
+        async function missYou() { await api('missYou'); alert("思念已送达！❤️"); }
         async function checkMissStats() {
             const stats = await api('getMissStats');
             const msg = currentUser === '黄泽钰' ? 
@@ -260,6 +284,7 @@
             const page = document.getElementById('content-page');
             const detail = document.getElementById('page-detail');
             page.classList.remove('hidden');
+            triggerTransition('content-page'); // 翻页动画
             detail.innerHTML = `<h3>我们的相册</h3><div class="group-grid" id="group-list"></div>`;
             const groups = await api('getGroups');
             const photos = await api('getPhotos');
@@ -303,8 +328,12 @@
         }
         async function addNewGroup() { const name = prompt("请输入新分组名称:"); if(name) { await api('addGroup', {groupName: name}); showGroups(); } }
         async function deletePhoto(id) { if(confirm('删除这张回忆？')) { await api('delPhoto', {id}); refreshGroupPhotos(); } }
-        function backToMain() { document.getElementById('content-page').classList.add('hidden'); document.getElementById('main-page').classList.remove('hidden'); }
+        function backToMain() { 
+            document.getElementById('content-page').classList.add('hidden'); 
+            const mainPage = document.getElementById('main-page');
+            mainPage.classList.remove('hidden'); 
+            triggerTransition('main-page'); // 翻页动画
+        }
     </script>
 </body>
 </html>
-      
