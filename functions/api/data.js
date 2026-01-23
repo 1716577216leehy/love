@@ -1,5 +1,5 @@
 export async function onRequestPost(context) {
-    const { action, user, content, image, id, groupName } = await context.request.json();
+    const { action, user, content, amount, category, date, image, id, groupName } = await context.request.json();
     const KV = context.env.LOVE_DATA;
 
     // --- 辅助函数：获取北京时间格式字符串 ---
@@ -28,7 +28,6 @@ export async function onRequestPost(context) {
         const missLogs = JSON.parse(await KV.get("miss_logs") || "[]");
         const targetUser = user === "黄泽钰" ? "李鸿运" : "黄泽钰";
         
-        // 转换当前北京时间用于统计
         const now = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Shanghai"}));
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
@@ -43,7 +42,7 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify(stats));
     }
 
-    // --- 2. 生日愿望管理 (修复北京时间) ---
+    // --- 2. 生日愿望管理 ---
     if (action === 'addWish') {
         const wishes = JSON.parse(await KV.get("birthday_wishes") || "[]");
         wishes.push({ 
@@ -68,7 +67,7 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify({ status: "ok" }));
     }
 
-    // --- 3. 心情记录逻辑 (修复北京时间) ---
+    // --- 3. 心情记录逻辑 ---
     if (action === 'addMemo') {
         const memos = JSON.parse(await KV.get("memos") || "[]");
         const bjTimeStr = getBeijingTime();
@@ -118,6 +117,38 @@ export async function onRequestPost(context) {
         let groups = JSON.parse(await KV.get("album_groups") || '["默认分组"]');
         if(!groups.includes(groupName)) groups.push(groupName);
         await KV.put("album_groups", JSON.stringify(groups));
+        return new Response(JSON.stringify({ status: "ok" }));
+    }
+
+    // --- 6. 专属记账功能 (新增) ---
+    if (action === 'addBill') {
+        // 简单鉴权，虽然前端也会藏入口，后端再防一手
+        if (user !== '李鸿运') return new Response(JSON.stringify({ error: "No permission" }));
+        
+        const bills = JSON.parse(await KV.get("accounting_records") || "[]");
+        bills.push({
+            id: Date.now(),
+            amount: amount,
+            category: category,
+            desc: content, // 备注
+            date: date, // 消费日期
+            createTime: getBeijingTime()
+        });
+        await KV.put("accounting_records", JSON.stringify(bills));
+        return new Response(JSON.stringify({ status: "ok" }));
+    }
+
+    if (action === 'getBills') {
+        if (user !== '李鸿运') return new Response("[]");
+        const bills = await KV.get("accounting_records") || "[]";
+        return new Response(bills);
+    }
+
+    if (action === 'delBill') {
+        if (user !== '李鸿运') return new Response(JSON.stringify({ error: "No permission" }));
+        let bills = JSON.parse(await KV.get("accounting_records") || "[]");
+        bills = bills.filter(b => b.id !== id);
+        await KV.put("accounting_records", JSON.stringify(bills));
         return new Response(JSON.stringify({ status: "ok" }));
     }
 
