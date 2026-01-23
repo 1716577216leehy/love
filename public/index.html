@@ -34,7 +34,6 @@
         #music-player { position: fixed; top: 20px; right: 20px; z-index: 100; background: var(--glass); padding: 12px 20px; border-radius: 30px; backdrop-filter: blur(10px); display: flex; align-items: center; gap: 12px; border: 1px solid white; }
         #music-player button { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
         
-        /* 适配手机安全区域 */
         .container { 
             height: 100vh; height: calc(var(--vh, 1vh) * 100); 
             display: flex; justify-content: center; align-items: center; perspective: 1000px; 
@@ -45,8 +44,7 @@
             background: var(--glass); padding: 1.5rem; border-radius: 35px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); 
             backdrop-filter: blur(15px); border: 2px solid white; text-align: center; width: 90%; 
             max-width: 550px; 
-            height: 78vh; /* 再次压缩，彻底防遮挡 */
-            max-height: 78vh; 
+            height: 78vh; max-height: 78vh; 
             overflow: hidden; display: flex; flex-direction: column;
             position: relative; transform-origin: left center; transition: all 0.5s;
         }
@@ -88,8 +86,31 @@
         .viewer-btns { margin-top: 20px; display: flex; gap: 15px; }
 
         .hidden { display: none !important; }
-        textarea { width: 100%; border-radius: 20px; border: 2px solid var(--soft-pink); padding: 15px; box-sizing: border-box; resize: none; background: var(--light-pink); color: var(--deep-pink); outline: none; font-size: 14px; }
+        textarea, input[type="text"], input[type="number"], input[type="date"] { width: 100%; border-radius: 20px; border: 2px solid var(--soft-pink); padding: 10px; box-sizing: border-box; resize: none; background: var(--light-pink); color: var(--deep-pink); outline: none; font-size: 14px; margin-bottom: 5px; }
+        
         #bottom-area { margin-top: auto; padding-top: 5px; padding-bottom: 5px; flex-shrink: 0; width: 100%; }
+        
+        /* 记账本专属样式 */
+        .accounting-entry {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+            border: 2px solid #ffe5ec;
+        }
+        .bill-item {
+            background: white; padding: 12px; border-radius: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--boy-blue);
+        }
         
         @keyframes pageIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .page-animate { animation: pageIn 0.4s ease-out forwards; }
@@ -115,7 +136,7 @@
 
     <div class="container">
         <div id="login-page" class="card" style="justify-content: center;">
-            <h1>给黄泽钰搭的小窝</h1>
+            <h1>黄泽钰搭的小窝</h1>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 <button class="btn btn-primary" onclick="login('黄泽钰')">我是 黄泽钰 🌸</button>
                 <button class="btn" style="background:var(--boy-blue); color:white;" onclick="login('李鸿运')">我是 李鸿运 ☁️</button>
@@ -124,7 +145,7 @@
 
         <div id="birthday-story" class="card hidden" style="justify-content: center;">
             <div id="story-content">
-                <div id="story-text" style="font-size: 1.5rem; color: var(--xmas-red); font-weight: bold; line-height: 1.6; margin-bottom: 30px;"></div>
+                <div id="story-text" class="story-text"></div>
                 <div id="wish-input-area" class="hidden" style="margin-bottom:20px;">
                     <textarea id="wish-box" rows="4" placeholder="在这里写下今年的生日愿望..."></textarea>
                 </div>
@@ -148,7 +169,7 @@
                 <div class="menu-item" onclick="missYou(event)">❤️ 想你了</div>
             </div>
             <div id="wish-menu-container" style="flex-shrink: 0; margin-top: 5px;"></div>
-        </div>
+            </div>
 
         <div id="content-page" class="card hidden">
             <div id="page-detail"></div>
@@ -160,10 +181,9 @@
         </div>
     </div>
 
-    <audio id="audio-element" preload="auto" loop></audio>
+    <audio id="audio-element" preload="auto"></audio>
 
     <script>
-        // 手机浏览器高度补丁
         let vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
         window.addEventListener('resize', () => { vh = window.innerHeight * 0.01; document.documentElement.style.setProperty('--vh', `${vh}px`); });
@@ -176,6 +196,8 @@
         let currentMusicIdx = 0;
 
         document.body.addEventListener('click', () => { if (!audioInitiated && currentUser) initAudio(); }, { once: false });
+        // 关键修改：监听播放结束，自动下一首
+        audio.addEventListener('ended', nextMusic);
 
         async function api(action, data = {}) {
             const res = await fetch('/api/data', { method: 'POST', body: JSON.stringify({ action, user: currentUser, ...data }) });
@@ -205,11 +227,28 @@
             document.getElementById('main-page').classList.remove('hidden');
             document.getElementById('welcome-msg').innerText = "你好呀, " + currentUser;
             const now = new Date(); const isBD = (now.getMonth() === 11 && now.getDate() === 24);
+            
+            // 每次进入先清除旧的记账入口
+            const oldEntry = document.getElementById('accounting-entry');
+            if(oldEntry) oldEntry.remove();
+
             if (isBD) {
                 document.body.classList.add('birthday-theme');
                 if(currentUser === '黄泽钰') document.getElementById('wish-menu-container').innerHTML = `<div class="menu-item" onclick="showSection('wish')" style="background:#fff0f3; border:2px solid var(--xmas-red); color:var(--xmas-red); min-height:45px;">🌟 许下的愿望</div>`;
                 startSnowEffect();
             }
+            
+            // 记账入口：仅李鸿运可见
+            if(currentUser === '李鸿运') {
+                const entry = document.createElement('div');
+                entry.id = 'accounting-entry';
+                entry.className = 'accounting-entry';
+                entry.innerHTML = '💰';
+                entry.title = "小金库";
+                entry.onclick = () => showSection('bill');
+                document.getElementById('main-page').appendChild(entry);
+            }
+
             startLoveTimer();
         }
 
@@ -261,7 +300,8 @@
 
         async function refreshPhotos(g) {
             const photos = await api('getPhotos'); const list = document.getElementById('img-list'); list.innerHTML = '';
-            photos.filter(p => p.group === g).reverse().forEach(p => {
+            // 关键修改：去掉了 .reverse()，现在是按添加顺序（旧 -> 新，左 -> 右）显示
+            photos.filter(p => p.group === g).forEach(p => {
                 const wrapper = document.createElement('div'); wrapper.className = 'album-img-wrapper'; wrapper.id = `img-${p.id}`;
                 wrapper.innerHTML = `<img src="${p.data}"><div class="select-badge">✓</div><button class="btn" style="position:absolute;top:0;right:0;padding:2px 6px;opacity:0.8" onclick="event.stopPropagation(); deletePhoto(${p.id})">×</button>`;
                 let timer;
@@ -276,6 +316,7 @@
             document.getElementById('main-page').classList.add('hidden');
             const page = document.getElementById('content-page'); const detail = document.getElementById('page-detail');
             page.classList.remove('hidden'); document.getElementById('bottom-controls').innerHTML = '';
+            
             if (type === 'wish') {
                 const wishes = await api('getWishes'); detail.innerHTML = `<h3>🌟 历年愿望</h3><div id="wish-list" style="overflow-y:auto; flex:1;"></div>`;
                 wishes.reverse().forEach(w => {
@@ -285,7 +326,41 @@
                 });
             } else if (type === 'memo') { allMemos = await api('getMemos'); renderMemoSearch(detail); }
             else if (type === 'mood') { detail.innerHTML = `<h3>记心情</h3><textarea id="mood-text" rows="5" placeholder="此刻想说什么..."></textarea><br><button class="btn btn-primary" onclick="saveMood()">保存</button>`; }
+            else if (type === 'bill') {
+                // 记账界面渲染
+                const bills = await api('getBills');
+                let total = bills.reduce((sum, b) => sum + Number(b.amount), 0);
+                detail.innerHTML = `<h3>💰 小金库 (总计: ${total})</h3>
+                    <div style="background:white; padding:10px; border-radius:15px; margin-bottom:10px;">
+                        <input type="number" id="bill-amount" placeholder="金额" style="width:30%; display:inline-block">
+                        <input type="text" id="bill-cate" placeholder="用途" style="width:65%; display:inline-block">
+                        <input type="text" id="bill-desc" placeholder="备注..." style="margin-top:5px;">
+                        <input type="date" id="bill-date" value="${new Date().toISOString().split('T')[0]}" style="margin-top:5px;">
+                        <button class="btn btn-primary" style="width:100%; margin-top:5px;" onclick="saveBill()">记一笔</button>
+                    </div>
+                    <div id="bill-list" style="flex:1; overflow-y:auto;"></div>
+                `;
+                const list = document.getElementById('bill-list');
+                bills.reverse().forEach(b => {
+                    const item = document.createElement('div'); item.className = 'bill-item';
+                    item.innerHTML = `<div><b style="color:var(--boy-blue)">-${b.amount}</b> <span style="font-size:12px;color:#888">${b.category}</span><br><small>${b.date} ${b.desc}</small></div>
+                    <button class="btn" style="padding:2px 8px;font-size:12px" onclick="deleteBill(${b.id})">×</button>`;
+                    list.appendChild(item);
+                });
+            }
         }
+
+        async function saveBill() {
+            const amt = document.getElementById('bill-amount').value;
+            const cate = document.getElementById('bill-cate').value;
+            const desc = document.getElementById('bill-desc').value;
+            const date = document.getElementById('bill-date').value;
+            if(!amt || !cate) return alert("金额和用途必填哦");
+            await api('addBill', { amount: amt, category: cate, content: desc, date: date });
+            showSection('bill');
+        }
+
+        async function deleteBill(id) { if(confirm("删掉这条记录？")) { await api('delBill', {id}); showSection('bill'); } }
 
         function renderMemoSearch(container) {
             container.innerHTML = `<h3>回忆录</h3><div style="background:white; padding:10px; border-radius:15px; margin-bottom:10px; display:flex; flex-direction:column; gap:6px;">
