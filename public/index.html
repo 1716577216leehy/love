@@ -90,27 +90,31 @@
         
         #bottom-area { margin-top: auto; padding-top: 5px; padding-bottom: 5px; flex-shrink: 0; width: 100%; }
         
-        /* 记账本专属样式 */
+        /* 坏情绪小本本专属样式 */
         .accounting-entry {
             position: absolute;
             bottom: 20px;
             right: 20px;
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
             z-index: 10;
             border: 2px solid #ffe5ec;
         }
-        .bill-item {
-            background: white; padding: 12px; border-radius: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--boy-blue);
+        .complaint-item {
+            background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; 
+            border-left: 5px solid #2a9d8f; /* 用一个冷静的颜色 */
+            text-align: left;
+            position: relative;
         }
+        .complaint-header { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 5px; }
         
         @keyframes pageIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .page-animate { animation: pageIn 0.4s ease-out forwards; }
@@ -136,7 +140,7 @@
 
     <div class="container">
         <div id="login-page" class="card" style="justify-content: center;">
-            <h1>黄泽钰搭的小窝</h1>
+            <h1>给黄泽钰搭的小窝</h1>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 <button class="btn btn-primary" onclick="login('黄泽钰')">我是 黄泽钰 🌸</button>
                 <button class="btn" style="background:var(--boy-blue); color:white;" onclick="login('李鸿运')">我是 李鸿运 ☁️</button>
@@ -196,8 +200,7 @@
         let currentMusicIdx = 0;
 
         document.body.addEventListener('click', () => { if (!audioInitiated && currentUser) initAudio(); }, { once: false });
-        // 关键修改：监听播放结束，自动下一首
-        audio.addEventListener('ended', nextMusic);
+        audio.addEventListener('ended', nextMusic); // 监听播放结束
 
         async function api(action, data = {}) {
             const res = await fetch('/api/data', { method: 'POST', body: JSON.stringify({ action, user: currentUser, ...data }) });
@@ -228,7 +231,6 @@
             document.getElementById('welcome-msg').innerText = "你好呀, " + currentUser;
             const now = new Date(); const isBD = (now.getMonth() === 11 && now.getDate() === 24);
             
-            // 每次进入先清除旧的记账入口
             const oldEntry = document.getElementById('accounting-entry');
             if(oldEntry) oldEntry.remove();
 
@@ -238,14 +240,14 @@
                 startSnowEffect();
             }
             
-            // 记账入口：仅李鸿运可见
+            // 李鸿运专属入口
             if(currentUser === '李鸿运') {
                 const entry = document.createElement('div');
                 entry.id = 'accounting-entry';
                 entry.className = 'accounting-entry';
-                entry.innerHTML = '💰';
-                entry.title = "小金库";
-                entry.onclick = () => showSection('bill');
+                entry.innerHTML = '🌩️'; // 图标改为雷雨云
+                entry.title = "坏情绪小本本";
+                entry.onclick = () => showSection('complaint');
                 document.getElementById('main-page').appendChild(entry);
             }
 
@@ -300,7 +302,7 @@
 
         async function refreshPhotos(g) {
             const photos = await api('getPhotos'); const list = document.getElementById('img-list'); list.innerHTML = '';
-            // 关键修改：去掉了 .reverse()，现在是按添加顺序（旧 -> 新，左 -> 右）显示
+            // 排序：从旧到新（不使用 reverse）
             photos.filter(p => p.group === g).forEach(p => {
                 const wrapper = document.createElement('div'); wrapper.className = 'album-img-wrapper'; wrapper.id = `img-${p.id}`;
                 wrapper.innerHTML = `<img src="${p.data}"><div class="select-badge">✓</div><button class="btn" style="position:absolute;top:0;right:0;padding:2px 6px;opacity:0.8" onclick="event.stopPropagation(); deletePhoto(${p.id})">×</button>`;
@@ -326,41 +328,41 @@
                 });
             } else if (type === 'memo') { allMemos = await api('getMemos'); renderMemoSearch(detail); }
             else if (type === 'mood') { detail.innerHTML = `<h3>记心情</h3><textarea id="mood-text" rows="5" placeholder="此刻想说什么..."></textarea><br><button class="btn btn-primary" onclick="saveMood()">保存</button>`; }
-            else if (type === 'bill') {
-                // 记账界面渲染
-                const bills = await api('getBills');
-                let total = bills.reduce((sum, b) => sum + Number(b.amount), 0);
-                detail.innerHTML = `<h3>💰 小金库 (总计: ${total})</h3>
+            else if (type === 'complaint') {
+                // 坏情绪记录本
+                const list = await api('getComplaints');
+                detail.innerHTML = `<h3>🌩️ 坏情绪小本本</h3>
                     <div style="background:white; padding:10px; border-radius:15px; margin-bottom:10px;">
-                        <input type="number" id="bill-amount" placeholder="金额" style="width:30%; display:inline-block">
-                        <input type="text" id="bill-cate" placeholder="用途" style="width:65%; display:inline-block">
-                        <input type="text" id="bill-desc" placeholder="备注..." style="margin-top:5px;">
-                        <input type="date" id="bill-date" value="${new Date().toISOString().split('T')[0]}" style="margin-top:5px;">
-                        <button class="btn btn-primary" style="width:100%; margin-top:5px;" onclick="saveBill()">记一笔</button>
+                        <input type="text" id="cp-type" placeholder="心情类型 (如: 委屈/吃醋)" style="margin-bottom:5px;">
+                        <textarea id="cp-content" rows="3" placeholder="在这里写下你的碎碎念..." style="margin-bottom:5px;"></textarea>
+                        <input type="date" id="cp-date" value="${new Date().toISOString().split('T')[0]}" style="margin-bottom:5px;">
+                        <button class="btn btn-primary" style="width:100%;" onclick="saveComplaint()">😤 记录下来</button>
                     </div>
-                    <div id="bill-list" style="flex:1; overflow-y:auto;"></div>
+                    <div id="cp-list" style="flex:1; overflow-y:auto;"></div>
                 `;
-                const list = document.getElementById('bill-list');
-                bills.reverse().forEach(b => {
-                    const item = document.createElement('div'); item.className = 'bill-item';
-                    item.innerHTML = `<div><b style="color:var(--boy-blue)">-${b.amount}</b> <span style="font-size:12px;color:#888">${b.category}</span><br><small>${b.date} ${b.desc}</small></div>
-                    <button class="btn" style="padding:2px 8px;font-size:12px" onclick="deleteBill(${b.id})">×</button>`;
-                    list.appendChild(item);
+                const listEl = document.getElementById('cp-list');
+                list.reverse().forEach(item => {
+                    const div = document.createElement('div'); div.className = 'complaint-item';
+                    div.innerHTML = `
+                        <div class="complaint-header"><span>📅 ${item.date}</span> <span>🏷️ ${item.type}</span></div>
+                        <div style="font-size:14px; white-space: pre-wrap;">${item.content}</div>
+                        <button class="btn" style="position:absolute; bottom:5px; right:5px; padding:2px 8px; font-size:11px; background:#eee; color:#666" onclick="deleteComplaint(${item.id})">删除</button>
+                    `;
+                    listEl.appendChild(div);
                 });
             }
         }
 
-        async function saveBill() {
-            const amt = document.getElementById('bill-amount').value;
-            const cate = document.getElementById('bill-cate').value;
-            const desc = document.getElementById('bill-desc').value;
-            const date = document.getElementById('bill-date').value;
-            if(!amt || !cate) return alert("金额和用途必填哦");
-            await api('addBill', { amount: amt, category: cate, content: desc, date: date });
-            showSection('bill');
+        async function saveComplaint() {
+            const type = document.getElementById('cp-type').value;
+            const content = document.getElementById('cp-content').value;
+            const date = document.getElementById('cp-date').value;
+            if(!type || !content) return alert("写点什么吧...");
+            await api('addComplaint', { type, content, date });
+            showSection('complaint');
         }
 
-        async function deleteBill(id) { if(confirm("删掉这条记录？")) { await api('delBill', {id}); showSection('bill'); } }
+        async function deleteComplaint(id) { if(confirm("消气了吗？要删除这条记录吗？")) { await api('delComplaint', {id}); showSection('complaint'); } }
 
         function renderMemoSearch(container) {
             container.innerHTML = `<h3>回忆录</h3><div style="background:white; padding:10px; border-radius:15px; margin-bottom:10px; display:flex; flex-direction:column; gap:6px;">
