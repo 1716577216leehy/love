@@ -94,7 +94,6 @@
         .complaint-item { background: white; padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 5px solid #2a9d8f; text-align: left; position: relative; }
         .complaint-header { display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 5px; }
         
-        /* 愿望列表样式 */
         .wish-item { background: white; padding: 12px; border-radius: 15px; margin-bottom: 8px; text-align: left; border-left: 4px solid #ccc; font-size: 14px; transition: 0.3s; }
         .wish-item.done { border-left-color: var(--deep-pink); background: #fff0f3; text-decoration: line-through; opacity: 0.8; }
         .wish-status-btn { float: right; font-size: 12px; padding: 2px 8px; border-radius: 10px; border: 1px solid #ccc; cursor: pointer; background: white; margin-left: 5px; }
@@ -195,19 +194,19 @@
             return new Date(utc + (3600000 * 8));
         }
 
-        // --- 测试状态：将生日设为 1月1日 ---
+        // --- 核心：生日状态检查 (12.24 + 前置周末) ---
         function checkBirthdayStatus() {
             const now = getBeijingDate();
             const year = now.getFullYear();
             
-            // ⚠️ 关键修改：设置生日为 1月1日
-            const birthday = new Date(year, 0, 1); // 0代表1月
+            // ⚠️ 关键修改：恢复生日为 12月24日 (月份 11)
+            const birthday = new Date(year, 11, 24); 
             
             const diffTime = birthday - now;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 
-            // 判断今天是否是生日 (1.1)
-            const isBirthday = (now.getMonth() === 0 && now.getDate() === 1);
+            // 判断今天是否是生日 (12.24)
+            const isBirthday = (now.getMonth() === 11 && now.getDate() === 24);
 
             // 判断是否是生日前的第一个周五、周六、周日
             const dayOfWeek = now.getDay();
@@ -253,7 +252,6 @@
             const oldEntry = document.getElementById('accounting-entry');
             if(oldEntry) oldEntry.remove();
 
-            // 特殊日子主题 (生日/生日周)
             if (globalBirthdayStatus.isSpecial) {
                 document.body.classList.add('birthday-theme');
                 startSnowEffect();
@@ -261,9 +259,9 @@
                 document.body.classList.remove('birthday-theme');
             }
 
-            // 愿望入口逻辑：特殊日子 OR 历史有愿望
             const wishes = await api('getWishes');
             if (currentUser === '黄泽钰') {
+                // 如果是特殊日子，或者以前许过愿（数组有内容），则显示入口
                 if (globalBirthdayStatus.isSpecial || wishes.length > 0) {
                     document.getElementById('wish-menu-container').innerHTML = `<div class="menu-item" onclick="showSection('wish')" style="background:#fff0f3; border:2px solid var(--xmas-red); color:var(--xmas-red); min-height:45px;">🌟 许下的愿望</div>`;
                 } else {
