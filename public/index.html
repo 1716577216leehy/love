@@ -195,18 +195,19 @@
             return new Date(utc + (3600000 * 8));
         }
 
-        // --- 测试日期修改：1月28日 ---
+        // --- 测试状态：将生日设为 1月1日 ---
         function checkBirthdayStatus() {
             const now = getBeijingDate();
             const year = now.getFullYear();
-            // 关键修改：月份 0 = 1月，日期 28
-            const birthday = new Date(year, 0, 28); 
+            
+            // ⚠️ 关键修改：设置生日为 1月1日
+            const birthday = new Date(year, 0, 1); // 0代表1月
             
             const diffTime = birthday - now;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 
-            // 判断今天是否是生日 (1.28)
-            const isBirthday = (now.getMonth() === 0 && now.getDate() === 28);
+            // 判断今天是否是生日 (1.1)
+            const isBirthday = (now.getMonth() === 0 && now.getDate() === 1);
 
             // 判断是否是生日前的第一个周五、周六、周日
             const dayOfWeek = now.getDay();
@@ -252,6 +253,7 @@
             const oldEntry = document.getElementById('accounting-entry');
             if(oldEntry) oldEntry.remove();
 
+            // 特殊日子主题 (生日/生日周)
             if (globalBirthdayStatus.isSpecial) {
                 document.body.classList.add('birthday-theme');
                 startSnowEffect();
@@ -259,6 +261,7 @@
                 document.body.classList.remove('birthday-theme');
             }
 
+            // 愿望入口逻辑：特殊日子 OR 历史有愿望
             const wishes = await api('getWishes');
             if (currentUser === '黄泽钰') {
                 if (globalBirthdayStatus.isSpecial || wishes.length > 0) {
