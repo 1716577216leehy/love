@@ -179,7 +179,7 @@
 
         let currentUser = ""; let allMemos = []; let currentStoryStep = 0; let currentGroup = ""; let audioInitiated = false;
         let isSelectMode = false; let selectedPhotos = [];
-        let globalBirthdayStatus = {}; // 缓存生日状态
+        let globalBirthdayStatus = {};
 
         const startDate = new Date(2026, 0, 9, 22, 51, 0); 
         const audio = document.getElementById('audio-element');
@@ -189,28 +189,26 @@
         document.body.addEventListener('click', () => { if (!audioInitiated && currentUser) initAudio(); }, { once: false });
         audio.addEventListener('ended', nextMusic);
 
-        // --- 核心：北京时间日期计算 ---
         function getBeijingDate() {
             const d = new Date();
             const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
             return new Date(utc + (3600000 * 8));
         }
 
-        // --- 核心：生日状态检查 (生日当天 + 之前的首个周五六日) ---
+        // --- 测试日期修改：1月28日 ---
         function checkBirthdayStatus() {
             const now = getBeijingDate();
             const year = now.getFullYear();
-            const birthday = new Date(year, 11, 24); // 12月24日 (月份0-11)
+            // 关键修改：月份 0 = 1月，日期 28
+            const birthday = new Date(year, 0, 28); 
             
-            // 计算时间差(天)
             const diffTime = birthday - now;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 
-            // 判断今天是否是生日
-            const isBirthday = (now.getMonth() === 11 && now.getDate() === 24);
+            // 判断今天是否是生日 (1.28)
+            const isBirthday = (now.getMonth() === 0 && now.getDate() === 28);
 
             // 判断是否是生日前的第一个周五、周六、周日
-            // 逻辑：距离生日7天以内，且是周五(5)、周六(6)、周日(0)
             const dayOfWeek = now.getDay();
             const isPreWeekend = (diffDays > 0 && diffDays <= 7) && (dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0);
 
@@ -234,7 +232,6 @@
                     currentUser = user; initAudio();
                     
                     globalBirthdayStatus = checkBirthdayStatus();
-                    // 如果是特别的日子(生日或之前的周末)，进入剧情模式
                     if (globalBirthdayStatus.isSpecial) startStory(); 
                     else enterMain();
                 } else { alert("小笨蛋~再试一下"); }
@@ -251,12 +248,10 @@
             document.getElementById('main-page').classList.remove('hidden');
             document.getElementById('welcome-msg').innerText = "你好呀, " + currentUser;
             
-            // 刷新一次状态
             globalBirthdayStatus = checkBirthdayStatus();
             const oldEntry = document.getElementById('accounting-entry');
             if(oldEntry) oldEntry.remove();
 
-            // 1. 特殊日子主题
             if (globalBirthdayStatus.isSpecial) {
                 document.body.classList.add('birthday-theme');
                 startSnowEffect();
@@ -264,8 +259,6 @@
                 document.body.classList.remove('birthday-theme');
             }
 
-            // 2. 愿望清单入口逻辑
-            // (1) 特殊日子必显示 (2) 以前许过愿(度过第一个生日后)也显示
             const wishes = await api('getWishes');
             if (currentUser === '黄泽钰') {
                 if (globalBirthdayStatus.isSpecial || wishes.length > 0) {
@@ -275,7 +268,6 @@
                 }
             }
             
-            // 3. 李鸿运专属入口
             if(currentUser === '李鸿运') {
                 const entry = document.createElement('div');
                 entry.id = 'accounting-entry';
@@ -291,14 +283,9 @@
 
         function startLoveTimer() {
             const timerEl = document.getElementById('love-timer');
-            // 如果是生日当天 (12.24)
             if (globalBirthdayStatus.isBirthday) {
                 timerEl.innerText = currentUser === '李鸿运' ? "今天是她的生日哦" : "祝黄泽钰小朋友生日快乐！";
                 return;
-            }
-            // 如果是生日前的预热周末
-            if (globalBirthdayStatus.isSpecial && !globalBirthdayStatus.isBirthday) {
-                 // 这里保持倒计时，或者显示“生日周快乐”也可以，目前保持计时
             }
 
             setInterval(() => {
@@ -312,7 +299,6 @@
             }, 1000);
         }
 
-        // --- 剧情逻辑 ---
         const storySteps = ["你好~ 黄泽钰小朋友~", "这是一封提前为你准备的信", "我们在一起已经 {days} 天", "我们已经一起走过了那~~~~么远", "SPECIAL_DAY_MSG", "要祝我们的小寿星生日快乐~", "写下你的生日愿望吧~万一会实现呢", "INPUT_STEP"];
         
         function startStory() { document.getElementById('login-page').classList.add('hidden'); document.getElementById('birthday-story').classList.remove('hidden'); document.body.classList.add('birthday-theme'); startSnowEffect(); nextStory(); }
@@ -322,16 +308,11 @@
             const textEl = document.getElementById('story-text'); const inputArea = document.getElementById('wish-input-area'); const btn = document.getElementById('story-btn');
             let currentText = storySteps[currentStoryStep];
             
-            // 动态替换天数
             if (currentText.includes("{days}")) currentText = currentText.replace("{days}", Math.floor((new Date() - startDate)/(1000*60*60*24)));
             
-            // 动态替换“今天是个特别的日子”
             if (currentText === "SPECIAL_DAY_MSG") {
-                if (globalBirthdayStatus.isBirthday) {
-                    currentText = "今天是个特别的日子";
-                } else {
-                    currentText = `再过 ${globalBirthdayStatus.daysUntil} 天就是个特别的日子`;
-                }
+                if (globalBirthdayStatus.isBirthday) currentText = "今天是个特别的日子";
+                else currentText = `再过 ${globalBirthdayStatus.daysUntil} 天就是个特别的日子`;
             }
 
             if (currentText === "INPUT_STEP") { 
@@ -343,7 +324,6 @@
             triggerTransition('birthday-story');
         }
 
-        // --- 功能区 ---
         async function showSection(type) {
             document.getElementById('main-page').classList.add('hidden');
             const page = document.getElementById('content-page'); const detail = document.getElementById('page-detail');
@@ -355,12 +335,7 @@
                 wishes.reverse().forEach(w => {
                     const div = document.createElement('div'); 
                     div.className = `wish-item ${w.status === 1 ? 'done' : ''}`;
-                    div.innerHTML = `
-                        <button class="wish-status-btn" onclick="toggleWish(${w.id})">${w.status === 1 ? '已实现' : '未实现'}</button>
-                        <small style="color:#888">${w.time}</small><br>
-                        <b>${w.content}</b><br>
-                        <button class="btn" style="padding:2px 8px; font-size:11px; margin-top:5px; background:#eee; color:#666" onclick="deleteWish(${w.id})">删除</button>
-                    `;
+                    div.innerHTML = `<button class="wish-status-btn" onclick="toggleWish(${w.id})">${w.status === 1 ? '已实现' : '未实现'}</button><small style="color:#888">${w.time}</small><br><b>${w.content}</b><br><button class="btn" style="padding:2px 8px; font-size:11px; margin-top:5px; background:#eee; color:#666" onclick="deleteWish(${w.id})">删除</button>`;
                     document.getElementById('wish-list').appendChild(div);
                 });
             } else if (type === 'memo') { allMemos = await api('getMemos'); renderMemoSearch(detail); }
@@ -373,9 +348,7 @@
                         <textarea id="cp-content" rows="3" placeholder="在这里写下你的碎碎念..." style="margin-bottom:5px;"></textarea>
                         <input type="date" id="cp-date" value="${new Date().toISOString().split('T')[0]}" style="margin-bottom:5px;">
                         <button class="btn btn-primary" style="width:100%;" onclick="saveComplaint()">😤 记录下来</button>
-                    </div>
-                    <div id="cp-list" style="flex:1; overflow-y:auto;"></div>
-                `;
+                    </div><div id="cp-list" style="flex:1; overflow-y:auto;"></div>`;
                 const listEl = document.getElementById('cp-list');
                 list.reverse().forEach(item => {
                     const div = document.createElement('div'); div.className = 'complaint-item';
@@ -389,7 +362,6 @@
         async function saveComplaint() { const type = document.getElementById('cp-type').value; const content = document.getElementById('cp-content').value; const date = document.getElementById('cp-date').value; if(!type || !content) return alert("写点什么吧..."); await api('addComplaint', { type, content, date }); showSection('complaint'); }
         async function deleteComplaint(id) { if(confirm("消气了吗？要删除这条记录吗？")) { await api('delComplaint', {id}); showSection('complaint'); } }
 
-        // --- 通用与相册逻辑 (保持不变) ---
         async function showGroups() { const detail = document.getElementById('page-detail'); document.getElementById('main-page').classList.add('hidden'); document.getElementById('content-page').classList.remove('hidden'); const groups = await api('getGroups'); const photos = await api('getPhotos'); detail.innerHTML = `<h3>我们的相册</h3><div class="menu-grid" id="group-list"></div>`; groups.forEach(g => { const div = document.createElement('div'); div.className = 'menu-item'; div.innerHTML = `📂 ${g}<br><small>${photos.filter(p=>p.group===g).length} 张</small>`; div.onclick = () => openGroup(g); document.getElementById('group-list').appendChild(div); }); document.getElementById('bottom-controls').innerHTML = `<button class="btn" onclick="addNewGroup()">＋ 新建分组</button>`; }
         async function openGroup(g) { currentGroup = g; isSelectMode = false; selectedPhotos = []; document.getElementById('page-detail').innerHTML = `<h3 id="album-title">${g}</h3><div id="batch-bar" class="hidden" style="margin-bottom:10px;"><button class="btn btn-primary" onclick="downloadBatch()">📥 下载已选</button><button class="btn" onclick="exitSelectMode()">退出</button></div><div class="album-view" id="img-list"></div><div id="upload-area" style="background:white; padding:10px; border-radius:20px; border:1px dashed var(--soft-pink); flex-shrink:0;"><input type="file" id="img-input" accept="image/*" style="display:none"><label for="img-input" style="cursor:pointer; color:var(--deep-pink)">✨ 点击上传 ✨</label><br><button class="btn btn-primary" style="margin-top:5px; padding:6px 15px;" onclick="uploadToGroup()">上传</button></div>`; refreshPhotos(g); document.getElementById('bottom-controls').innerHTML = `<div style="font-size:12px;color:var(--deep-pink);margin-bottom:5px" onclick="showGroups()">⬅ 返回分组</div>`; }
         async function refreshPhotos(g) { const photos = await api('getPhotos'); const list = document.getElementById('img-list'); list.innerHTML = ''; photos.filter(p => p.group === g).forEach(p => { const wrapper = document.createElement('div'); wrapper.className = 'album-img-wrapper'; wrapper.id = `img-${p.id}`; wrapper.innerHTML = `<img src="${p.data}"><div class="select-badge">✓</div><button class="btn" style="position:absolute;top:0;right:0;padding:2px 6px;opacity:0.8" onclick="event.stopPropagation(); deletePhoto(${p.id})">×</button>`; let timer; wrapper.addEventListener('touchstart', () => { timer = setTimeout(() => enterSelectMode(p, wrapper), 600); }); wrapper.addEventListener('touchend', () => clearTimeout(timer)); wrapper.onclick = () => { if (isSelectMode) toggleSelect(p, wrapper); else openViewer(p.data); }; list.appendChild(wrapper); }); }
